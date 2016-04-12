@@ -45,8 +45,8 @@ class EIESWrapper:
         
         
     ### BEGIN USER INFO STUFF
-    def GetUserInfo(self, user_id, session_id):
-        return self.__exec(requests.get, 'users/%d' % user_id, {'session_id': session_id})
+    def GetUserInfo(self):
+        return self.__exec(requests.get, 'users/%d' % self.user_id, {'session_id': self.session_id})
     ### BEGIN USER INFO STUFF
     
     
@@ -54,42 +54,42 @@ class EIESWrapper:
     def LookupPubKey(self, domain, port):
         return self.__exec(requests.get, 'public_keys', {'domain': domain, 'port': port})
     
-    def NewKey(self, session_id, name, body):
-        return self.__exec(requests.post, 'keys', {'session_id': session_id, 'name': name, 'body': body})
+    def NewKey(self, name, body):
+        return self.__exec(requests.post, 'keys', {'session_id': self.session_id, 'name': name, 'body': body})
         
-    def RetrieveKey(self, key_id, session_id):
-        return self.__exec(requests.get, 'keys/%d' % key_id, {'session_id': session_id})
+    def RetrieveKey(self, key_id):
+        return self.__exec(requests.get, 'keys/%d' % key_id, {'session_id': self.session_id})
     
-    def UpdateKey(self, session_id, name, body):
-        return self.__exec(requests.put, 'keys', {'session_id': session_id, 'name': name, 'body': body})
+    def UpdateKey(self, name, body):
+        return self.__exec(requests.put, 'keys', {'session_id': self.session_id, 'name': name, 'body': body})
         
-    def DestroyKey(self, key_id, session_id):
-        return self.__exec(requests.delete, 'keys/%d' % key_id, {'session_id': session_id})
+    def DestroyKey(self, key_id):
+        return self.__exec(requests.delete, 'keys/%d' % key_id, {'session_id': self.session_id})
     ### END KEY STUFF
     
     
     ### BEGIN ENTITY STUFF
-    def NewEntity(self, session_id, name, domain, port):
-        return self.__exec(requests.post, 'entities', {'session_id': session_id, 'name': name, 'domain': domain, 'port': port})
+    def NewEntity(self, name, domain, port):
+        return self.__exec(requests.post, 'entities', {'session_id': self.session_id, 'name': name, 'domain': domain, 'port': port})
         
-    def RetrieveEntity(self, entity_id, session_id):
-        return self.__exec(requests.get, 'entities/%d' % entity_id, {'session_id': session_id})
+    def RetrieveEntity(self, entity_id):
+        return self.__exec(requests.get, 'entities/%d' % entity_id, {'session_id': self.session_id})
     
-    def UpdateEntity(self, session_id, name, domain, port):
-        return self.__exec(requests.put, 'entities', {'session_id': session_id, 'name': name, 'domain': domain, 'port': port})
+    def UpdateEntity(self, name, domain, port):
+        return self.__exec(requests.put, 'entities', {'session_id': self.session_id, 'name': name, 'domain': domain, 'port': port})
         
-    def DestroyEntity(self, entity_id, session_id):
-        return self.__exec(requests.delete, 'entities/%d' % entity_id, {'session_id': session_id})
+    def DestroyEntity(self, entity_id):
+        return self.__exec(requests.delete, 'entities/%d' % entity_id, {'session_id': self.session_id})
     ### END ENTITY STUFF
     
 
     ### BEGIN ENTITY TOKEN STUFF
-    def CreateEntityToken(self, session_id, entity_id, key_id):
-        return self.__exec(requests.post, 'entity_tokens', {'session_id': session_id, 'entity_id': entity_id, 'key_id': key_id})
+    def CreateEntityToken(self, entity_id, key_id):
+        return self.__exec(requests.post, 'entity_tokens', {'session_id': self.session_id, 'entity_id': entity_id, 'key_id': key_id})
         
     def RetrieveEntity(self, token_id, session_id):
-        return self.__exec(requests.get, 'entity_tokens/%d' % token_id, {'session_id': session_id})
+        return self.__exec(requests.get, 'entity_tokens/%d' % token_id, {'session_id': self.session_id})
     
     def DestroyEntity(self, token_id, session_id):
-        return self.__exec(requests.delete, 'entities_tokens/%d', {'session_id': session_id})
+        return self.__exec(requests.delete, 'entities_tokens/%d', {'session_id': self.session_id})
     ### END ENTITY TOKEN STUFF
