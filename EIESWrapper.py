@@ -1,5 +1,7 @@
 import requests,json,time,datetime
 
+debug = True
+
 def typeRighter(val):
     try:
         return float(val)
@@ -24,7 +26,11 @@ class EIESWrapper:
         self.session_id = None
 
     def __exec(self, operation, page, args):
+        global debug
         url = "%s%s" % (self.baseUrl, page)
+        if debug:
+            import urllib
+            print "%s %s?%s" % (operation.__name__.upper(), url, urllib.urlencode(args))
         return operation(url, data=json.dumps(args), headers={'content-type': 'application/json'})
         
     def __login(self, operation, args):
@@ -100,3 +106,11 @@ class EIESWrapper:
     def DestroyEntity(self, token_id, session_id):
         return self.__exec(requests.delete, 'entities_tokens/%d', {'session_id': self.session_id})
     ### END ENTITY TOKEN STUFF
+
+if __name__ == "__main__":
+    import sys
+    email = raw_input('email: ')
+    password = raw_input('password: ')
+    eies = EIESWrapper()
+    if email != None and len(email) > 0 and password != None and len(password) > 0:
+        eies.Login(email, password)
