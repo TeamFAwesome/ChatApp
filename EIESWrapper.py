@@ -34,13 +34,20 @@ class EIESWrapper:
     def Login(self, email, password):
         res = self.__login(requests.post, {'email': email, 'password': password})
         if int(res.status_code) != 200:
+            print res
             return False
         self.user_id = res.json()['user_id']
         self.session_id = res.json()['session_id']
         return True
 
     def Logout(self):
-        return requests.delete("%s%s" % (self.baseUrl, 'login'))
+        res = requests.delete("%s%s" % (self.baseUrl, 'login'))
+        if int(res.status_code) != 200:
+            print res
+            return False
+        EIESWrapper.__init__(self) #reset all the things
+        return True
+        
     ### END SESSION
         
         
