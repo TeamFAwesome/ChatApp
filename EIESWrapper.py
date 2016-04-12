@@ -33,20 +33,20 @@ class EIESWrapper:
         if debug:
             import urllib
             print "%s %s?%s" % (operation.__name__.upper(), url, urllib.urlencode(args))
-        return operation(url, data=json.dumps(args), stream=stream, headers={'content-type': 'application/json'})
+        res = operation(url, data=json.dumps(args), stream=stream, headers={'content-type': 'application/json'})
+        if debug:
+            print "%s\t%s" % (str(res), str(res.json()))
+        return res
 
     ### BEGIN SESSION
     def Login(self, email, password):
         res = self.__exec(requests.post, 'login', {'email': email, 'password': password}, stream=True)
         if int(res.status_code) != 200:
             res.close()
-            print res
             return False
         self.session = res
         self.user_id = res.json()['user_id']
         self.session_id = res.json()['session_id']
-        if debug:
-            print res.json()
         return True
 
     def Logout(self):
