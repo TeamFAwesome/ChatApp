@@ -20,6 +20,8 @@ class EIESWrapper:
     def __init__(self):
         global urlprefix
         self.baseUrl='%s/api/v1/' % urlprefix
+        self.user_id = None
+        self.session_id = None
 
     def __exec(self, operation, page, args):
         url = "%s%s" % (self.baseUrl, page)
@@ -31,8 +33,11 @@ class EIESWrapper:
     ### BEGIN SESSION
     def Login(self, email, password):
         res = self.__login(requests.post, {'email': email, 'password': password})
-        # TODO: HANDLE RESULT, populate class variables, return boolean for success
-        return res
+        if int(res.status_code) != 200:
+            return False
+        self.user_id = res.json()['user_id']
+        self.session_id = res.json()['session_id']
+        return True
 
     def Logout(self):
         return requests.delete("%s%s" % (self.baseUrl, 'login'))
