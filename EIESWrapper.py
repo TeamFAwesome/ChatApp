@@ -25,33 +25,36 @@ class EIESWrapper:
         self.baseUrl='%s/api/v1/' % urlprefix
         self.user_id = None
         self.session_id = None
+        self.session = None
 
-    def __exec(self, operation, page, args):
+    def __exec(self, operation, page, args, stream=None):
         global debug
         url = "%s%s" % (self.baseUrl, page)
         if debug:
             import urllib
             print "%s %s?%s" % (operation.__name__.upper(), url, urllib.urlencode(args))
-        return operation(url, data=json.dumps(args), headers={'content-type': 'application/json'})
-        
-    def __login(self, operation, args):
-        return self.__exec(operation, 'login', args)
+        return operation(url, data=json.dumps(args), stream=stream, headers={'content-type': 'application/json'})
 
     ### BEGIN SESSION
     def Login(self, email, password):
-        res = self.__login(requests.post, {'email': email, 'password': password})
+        res = self.__exec(requests.post, 'login', {'email': email, 'password': password}, stream=True)
         if int(res.status_code) != 200:
+            res.close()
             print res
             return False
+        self.session = res
         self.user_id = res.json()['user_id']
         self.session_id = res.json()['session_id']
+        if debug:
+            print res.json()
         return True
 
     def Logout(self):
         res = requests.delete("%s%s" % (self.baseUrl, 'login'))
-        if int(res.status_code) != 200:
+        if int(res.status_code) != 204:
             print res
             return False
+        self.session.close()
         EIESWrapper.__init__(self) #reset all the things
         return True
         
@@ -114,4 +117,5 @@ if __name__ == "__main__":
     password = raw_input('password: ')
     eies = EIESWrapper()
     if email != None and len(email) > 0 and password != None and len(password) > 0:
+        print "Object \"eies\" initialized. Now calling eies.Login with your username and password. Good luck!"
         eies.Login(email, password)
