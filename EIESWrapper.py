@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/python2 -i
 import requests,json,time,datetime
 
 debug = True
