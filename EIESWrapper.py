@@ -20,9 +20,13 @@ def typeRightArr(arr):
 urlprefix = "https://eies.herokuapp.com"
     
 class EIESWrapper:
-    def __init__(self):
+    def __init__(self, url=None):
         global urlprefix
+        if url != None:
+            urlprefix = url
         self.baseUrl='%s/api/v1/' % urlprefix
+        if debug:
+            print "Using %s as base URL for API calls" % self.baseUrl
         self.user_id = None
         self.session_id = None
         self.session = None
@@ -113,9 +117,13 @@ class EIESWrapper:
 
 if __name__ == "__main__":
     import sys
+    eies = None
+    if len(sys.argv) > 1:
+       eies = EIESWrapper(url=sys.argv[1])
+    else:
+       eies = EIESWrapper()
     email = raw_input('email: ')
     password = raw_input('password: ')
-    eies = EIESWrapper()
     if email != None and len(email) > 0 and password != None and len(password) > 0:
         print "Object \"eies\" initialized. Now calling eies.Login with your username and password. Good luck!"
         eies.Login(email, password)
