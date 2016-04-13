@@ -71,52 +71,52 @@ class EIESWrapper:
         
     ### BEGIN USER INFO STUFF
     def GetUserInfo(self):
-        return self.__exec(self.session.get, 'users/%d.json' % self.user_id, {'session_id': self.session_id})
+        return self.__exec(self.session.get, 'users/%d.json' % self.user_id, {'session_id': self.session_id}).json()
     ### BEGIN USER INFO STUFF
     
     
     ### BEGIN KEY STUFF
     def LookupPubKey(self, domain, port):
-        return self.__exec(self.session.get, 'public_keys', {'domain': domain, 'port': port})
+        return self.__exec(self.session.get, 'public_keys', {'domain': domain, 'port': port}).json()
     
     def NewKey(self, name, body):
-        return self.__exec(self.session.post, 'keys', {'session_id': self.session_id, 'name': name, 'body': body})
+        return self.__exec(self.session.post, 'keys', {'session_id': self.session_id, 'name': name, 'body': body}).json()
         
     def RetrieveKey(self, key_id):
-        return self.__exec(self.session.get, 'keys/%d' % key_id, {'session_id': self.session_id})
+        return self.__exec(self.session.get, 'keys/%d' % key_id, {'session_id': self.session_id}).json()
     
     def UpdateKey(self, name, body):
-        return self.__exec(self.session.put, 'keys', {'session_id': self.session_id, 'name': name, 'body': body})
+        return self.__exec(self.session.put, 'keys', {'session_id': self.session_id, 'name': name, 'body': body}).json()
         
     def DestroyKey(self, key_id):
-        return self.__exec(self.session.delete, 'keys/%d' % key_id, {'session_id': self.session_id})
+        return self.__exec(self.session.delete, 'keys/%d' % key_id, {'session_id': self.session_id}).json()
     ### END KEY STUFF
     
     
     ### BEGIN ENTITY STUFF
     def NewEntity(self, name, domain, port):
-        return self.__exec(self.session.post, 'entities', {'session_id': self.session_id, 'name': name, 'domain': domain, 'port': port})
+        return self.__exec(self.session.post, 'entities', {'session_id': self.session_id, 'name': name, 'domain': domain, 'port': port}).json()
         
     def RetrieveEntity(self, entity_id):
-        return self.__exec(self.session.get, 'entities/%d' % entity_id, {'session_id': self.session_id})
+        return self.__exec(self.session.get, 'entities/%d' % entity_id, {'session_id': self.session_id}).json()
     
     def UpdateEntity(self, name, domain, port):
-        return self.__exec(self.session.put, 'entities', {'session_id': self.session_id, 'name': name, 'domain': domain, 'port': port})
+        return self.__exec(self.session.put, 'entities', {'session_id': self.session_id, 'name': name, 'domain': domain, 'port': port}).json()
         
     def DestroyEntity(self, entity_id):
-        return self.__exec(self.session.delete, 'entities/%d' % entity_id, {'session_id': self.session_id})
+        return self.__exec(self.session.delete, 'entities/%d' % entity_id, {'session_id': self.session_id}).json()
     ### END ENTITY STUFF
     
 
     ### BEGIN ENTITY TOKEN STUFF
     def CreateEntityToken(self, entity_id, key_id):
-        return self.__exec(self.session.post, 'entity_tokens', {'session_id': self.session_id, 'entity_id': entity_id, 'key_id': key_id})
+        return self.__exec(self.session.post, 'entity_tokens', {'session_id': self.session_id, 'entity_id': entity_id, 'key_id': key_id}).json()
         
     def RetrieveEntity(self, token_id, session_id):
-        return self.__exec(self.session.get, 'entity_tokens/%d' % token_id, {'session_id': self.session_id})
+        return self.__exec(self.session.get, 'entity_tokens/%d' % token_id, {'session_id': self.session_id}).json()
     
     def DestroyEntity(self, token_id, session_id):
-        return self.__exec(self.session.delete, 'entities_tokens/%d', {'session_id': self.session_id})
+        return self.__exec(self.session.delete, 'entities_tokens/%d', {'session_id': self.session_id}).json()
     ### END ENTITY TOKEN STUFF
 
 if __name__ == "__main__":
