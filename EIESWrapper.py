@@ -129,14 +129,19 @@ if __name__ == "__main__":
     import sys,code
     if not success:
         sys.exit(-1)
-    code.interact(local=locals())
     eies = None
     if len(sys.argv) > 1:
        eies = EIESWrapper(url=sys.argv[1])
     else:
        eies = EIESWrapper()
-    email = raw_input('email: ')
-    password = raw_input('password: ')
+    def inp(fn):
+        return (fn('email: '), fn('password: '))
+    try:
+        email, password = inp(raw_input) #only defined for python2, because python3's equivalent of python2's input isn't input
+    except:
+        email, password = inp(input) #python 3 equivalent of raw_input
     if email != None and len(email) > 0 and password != None and len(password) > 0:
-        print("Object \"eies\" initialized. Now calling eies.Login with your username and password. Good luck!")
         eies.Login(email, password)
+        code.interact(banner="Object \"eies\" initialized. Now calling eies.Login with your username and password. Good luck!",local=locals())
+    else:
+        code.interact(banner="Object \"eies\" initialized. Please call eies.Login with your username and password to fool around with the wrapper!",local=locals())
