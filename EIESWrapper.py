@@ -1,7 +1,7 @@
 #!/usr/bin/python2 -i
 import requests,json,time,datetime
 
-debug = True
+debug = False #True
 
 def typeRighter(val):
     try:
