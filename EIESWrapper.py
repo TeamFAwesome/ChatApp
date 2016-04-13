@@ -1,5 +1,11 @@
-#!/usr/bin/python2 -i
-import requests,json,time,datetime
+#!/usr/bin/python3
+from __future__ import print_function
+success = False
+try:
+    import requests,json,time,datetime
+    success = True
+except:
+    print("It seems like your python3 doesn't include requests!\nRun:\n\nsudo apt-get install python3-requests\n\n\n")
 
 debug = False #True
 
@@ -26,7 +32,7 @@ class EIESWrapper:
             urlprefix = url
         self.baseUrl='%s/api/v1/' % urlprefix
         if debug:
-            print "Using %s as base URL for API calls" % self.baseUrl
+            print("Using %s as base URL for API calls" % self.baseUrl)
         self.user_id = None
         self.session_id = None
         self.session = requests.Session()
@@ -36,7 +42,7 @@ class EIESWrapper:
         url = "%s%s" % (self.baseUrl, page)
         if debug:
             import urllib
-            print "%s %s?%s" % (operation.__name__.upper(), url, urllib.urlencode(args))
+            print("%s %s?%s" % (operation.__name__.upper(), url, urllib.urlencode(args)))
         res = operation(url, data=json.dumps(args), headers={'content-type': 'application/json'})
         if debug:
             jsonmaybe = None
@@ -44,7 +50,7 @@ class EIESWrapper:
                 jsonmaybe = str(res.json())
             except:
                 jsonmaybe = "NOT JSON?"
-            print "%s\t%s" % (str(res), jsonmaybe)
+            print("%s\t%s" % (str(res), jsonmaybe))
         return res
 
     ### BEGIN SESSION
@@ -60,7 +66,7 @@ class EIESWrapper:
     def Logout(self):
         res = self.session.delete("%s%s" % (self.baseUrl, 'login'))
         if int(res.status_code) != 204:
-            print res
+            print(res)
             return False
         self.session.close()
         EIESWrapper.__init__(self) #reset all the things
@@ -120,7 +126,10 @@ class EIESWrapper:
     ### END ENTITY TOKEN STUFF
 
 if __name__ == "__main__":
-    import sys
+    import sys,code
+    if not success:
+        sys.exit(-1)
+    code.interact(local=locals())
     eies = None
     if len(sys.argv) > 1:
        eies = EIESWrapper(url=sys.argv[1])
@@ -129,5 +138,5 @@ if __name__ == "__main__":
     email = raw_input('email: ')
     password = raw_input('password: ')
     if email != None and len(email) > 0 and password != None and len(password) > 0:
-        print "Object \"eies\" initialized. Now calling eies.Login with your username and password. Good luck!"
+        print("Object \"eies\" initialized. Now calling eies.Login with your username and password. Good luck!")
         eies.Login(email, password)
