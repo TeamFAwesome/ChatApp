@@ -29,32 +29,36 @@ class EIESWrapper:
             print "Using %s as base URL for API calls" % self.baseUrl
         self.user_id = None
         self.session_id = None
-        self.session = None
+        self.session = requests.Session()
 
-    def __exec(self, operation, page, args, stream=None):
+    def __exec(self, operation, page, args):
         global debug
         url = "%s%s" % (self.baseUrl, page)
         if debug:
             import urllib
             print "%s %s?%s" % (operation.__name__.upper(), url, urllib.urlencode(args))
-        res = operation(url, data=json.dumps(args), stream=stream, headers={'content-type': 'application/json'})
+        res = operation(url, data=json.dumps(args), headers={'content-type': 'application/json'})
         if debug:
-            print "%s\t%s" % (str(res), str(res.json()))
+            jsonmaybe = None
+            try:
+                jsonmaybe = str(res.json())
+            except:
+                jsonmaybe = "NOT JSON?"
+            print "%s\t%s" % (str(res), jsonmaybe)
         return res
 
     ### BEGIN SESSION
     def Login(self, email, password):
-        res = self.__exec(requests.post, 'login', {'email': email, 'password': password}, stream=True)
+        res = self.__exec(self.session.post, 'login', {'email': email, 'password': password})
         if int(res.status_code) != 200:
             res.close()
             return False
-        self.session = res
         self.user_id = res.json()['user_id']
         self.session_id = res.json()['session_id']
         return True
 
     def Logout(self):
-        res = requests.delete("%s%s" % (self.baseUrl, 'login'))
+        res = self.session.delete("%s%s" % (self.baseUrl, 'login'))
         if int(res.status_code) != 204:
             print res
             return False
@@ -67,52 +71,52 @@ class EIESWrapper:
         
     ### BEGIN USER INFO STUFF
     def GetUserInfo(self):
-        return self.__exec(requests.get, 'users/%d' % self.user_id, {'session_id': self.session_id})
+        return self.__exec(self.session.get, 'users/%d.json' % self.user_id, {'session_id': self.session_id})
     ### BEGIN USER INFO STUFF
     
     
     ### BEGIN KEY STUFF
     def LookupPubKey(self, domain, port):
-        return self.__exec(requests.get, 'public_keys', {'domain': domain, 'port': port})
+        return self.__exec(self.session.get, 'public_keys', {'domain': domain, 'port': port})
     
     def NewKey(self, name, body):
-        return self.__exec(requests.post, 'keys', {'session_id': self.session_id, 'name': name, 'body': body})
+        return self.__exec(self.session.post, 'keys', {'session_id': self.session_id, 'name': name, 'body': body})
         
     def RetrieveKey(self, key_id):
-        return self.__exec(requests.get, 'keys/%d' % key_id, {'session_id': self.session_id})
+        return self.__exec(self.session.get, 'keys/%d' % key_id, {'session_id': self.session_id})
     
     def UpdateKey(self, name, body):
-        return self.__exec(requests.put, 'keys', {'session_id': self.session_id, 'name': name, 'body': body})
+        return self.__exec(self.session.put, 'keys', {'session_id': self.session_id, 'name': name, 'body': body})
         
     def DestroyKey(self, key_id):
-        return self.__exec(requests.delete, 'keys/%d' % key_id, {'session_id': self.session_id})
+        return self.__exec(self.session.delete, 'keys/%d' % key_id, {'session_id': self.session_id})
     ### END KEY STUFF
     
     
     ### BEGIN ENTITY STUFF
     def NewEntity(self, name, domain, port):
-        return self.__exec(requests.post, 'entities', {'session_id': self.session_id, 'name': name, 'domain': domain, 'port': port})
+        return self.__exec(self.session.post, 'entities', {'session_id': self.session_id, 'name': name, 'domain': domain, 'port': port})
         
     def RetrieveEntity(self, entity_id):
-        return self.__exec(requests.get, 'entities/%d' % entity_id, {'session_id': self.session_id})
+        return self.__exec(self.session.get, 'entities/%d' % entity_id, {'session_id': self.session_id})
     
     def UpdateEntity(self, name, domain, port):
-        return self.__exec(requests.put, 'entities', {'session_id': self.session_id, 'name': name, 'domain': domain, 'port': port})
+        return self.__exec(self.session.put, 'entities', {'session_id': self.session_id, 'name': name, 'domain': domain, 'port': port})
         
     def DestroyEntity(self, entity_id):
-        return self.__exec(requests.delete, 'entities/%d' % entity_id, {'session_id': self.session_id})
+        return self.__exec(self.session.delete, 'entities/%d' % entity_id, {'session_id': self.session_id})
     ### END ENTITY STUFF
     
 
     ### BEGIN ENTITY TOKEN STUFF
     def CreateEntityToken(self, entity_id, key_id):
-        return self.__exec(requests.post, 'entity_tokens', {'session_id': self.session_id, 'entity_id': entity_id, 'key_id': key_id})
+        return self.__exec(self.session.post, 'entity_tokens', {'session_id': self.session_id, 'entity_id': entity_id, 'key_id': key_id})
         
     def RetrieveEntity(self, token_id, session_id):
-        return self.__exec(requests.get, 'entity_tokens/%d' % token_id, {'session_id': self.session_id})
+        return self.__exec(self.session.get, 'entity_tokens/%d' % token_id, {'session_id': self.session_id})
     
     def DestroyEntity(self, token_id, session_id):
-        return self.__exec(requests.delete, 'entities_tokens/%d', {'session_id': self.session_id})
+        return self.__exec(self.session.delete, 'entities_tokens/%d', {'session_id': self.session_id})
     ### END ENTITY TOKEN STUFF
 
 if __name__ == "__main__":
