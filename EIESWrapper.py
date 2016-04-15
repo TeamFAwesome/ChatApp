@@ -42,7 +42,15 @@ class EIESWrapper:
         url = "%s%s" % (self.baseUrl, page)
         if debug:
             import urllib
-            print("%s %s?%s" % (operation.__name__.upper(), url, urllib.urlencode(args)))
+            enc = None
+            try:
+                enc = urllib.urlencode
+                enc({'test': 0})
+            except:
+                import urllib.parse
+                enc = urllib.parse.urlencode
+                enc({'test': 0})
+            print("%s %s?%s" % (operation.__name__.upper(), url, enc(args)))
         res = operation(url, data=json.dumps(args), headers={'content-type': 'application/json'})
         if debug:
             jsonmaybe = None
