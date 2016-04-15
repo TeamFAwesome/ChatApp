@@ -77,7 +77,11 @@ class EIESWrapper:
         
     ### BEGIN USER INFO STUFF
     def GetUserInfo(self):
-        return self.__exec(self.session.get, 'users/%d.json' % self.user_id, {'session_id': self.session_id}).json()
+        return GetUserInfo(self.user_id)
+
+    def GetUserInfo(self, user_id):
+        return self.__exec(self.session.get, 'users/%d.json' % user_id, {'session_id': self.session_id}).json()
+
     ### BEGIN USER INFO STUFF
     
     
