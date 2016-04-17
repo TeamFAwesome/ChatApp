@@ -3,7 +3,7 @@
  */
 var app = angular.module('ChatApp', []);
 
-app.controller("Main", function ($scope, $http) {
+app.controller("Main", function ($scope, $http, EIESWrapper) {
     $scope.title = "EIES WebSocket Demo";
     $scope.author = "";
     $scope.text = "";
@@ -39,6 +39,6 @@ app.controller("Main", function ($scope, $http) {
 
         // reset scope
         $scope.text = "";
-    }
+    };
 
 });

@@ -4,12 +4,8 @@ import tornado.websocket
 
 clients = []
 
-
-# class IndexHandler(tornado.web.RequestHandler):
-#     @tornado.web.asynchronous
-#     def get(request):
-#         request.render("index.html")
-
+# hack in EIES entity here.
+# be sure to serve over 0.0.0.0:10000 so that ChatApp can find the endpoint
 
 class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
