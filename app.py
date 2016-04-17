@@ -5,13 +5,16 @@ import tornado.websocket
 clients = []
 
 
-class IndexHandler(tornado.web.RequestHandler):
-    @tornado.web.asynchronous
-    def get(request):
-        request.render("index.html")
+# class IndexHandler(tornado.web.RequestHandler):
+#     @tornado.web.asynchronous
+#     def get(request):
+#         request.render("index.html")
 
 
 class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
+    def check_origin(self, origin):
+        return True
+
     def open(self, *args):
         print("open", "WebSocketChatHandler")
         clients.append(self)
@@ -25,7 +28,8 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
         clients.remove(self)
 
 
-app = tornado.web.Application([(r'/chat', WebSocketChatHandler), (r'/', IndexHandler)])
+# app = tornado.web.Application([(r'/chat', WebSocketChatHandler), (r'/', IndexHandler)])
+app = tornado.web.Application([(r'/chat', WebSocketChatHandler)])
 
-app.listen(9999)
+app.listen(10000)
 tornado.ioloop.IOLoop.instance().start()
