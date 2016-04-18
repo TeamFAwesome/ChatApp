@@ -3,7 +3,7 @@ The chat app that integrates with EIES security as a demo.
 
 ## Setup Server ##
 ```
-virtualenv venv
+virtualenv venv -p python3
 source venv/bin/activate
 pip install -r requirements.txt
 python app.py
