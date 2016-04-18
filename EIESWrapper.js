@@ -15,8 +15,8 @@ api.onclose = function (e) {
 };
 
 api.onmessage = function (e) {
-    console.log("got message");
-    console.log(e.data);
+    //console.log("got message");
+    //console.log(e.data);
     if (e.data == "web socket explosion")
     {
       console.log("fatal exception occured in python-land. purging pending call queue to unblock invokes")
@@ -33,7 +33,7 @@ api.onmessage = function (e) {
     {
         if (data.func == pendingcalls[pendingcall].args.func)
         {
-            console.log("Found pending call with correct func");
+            //console.log("Found pending call with correct func");
             pendingargs = pendingcalls[pendingcall].args;
         
             returnedcall = pendingcalls[pendingcall];
@@ -51,11 +51,11 @@ api.onmessage = function (e) {
     }
     if (returnedcall != null)
     {
-        console.log("received response!");
+        /*console.log("received response!");
         console.log("returned:");
         console.log(returnedcall);
         console.log("data:");
-        console.log(data);
+        console.log(data);*/
         returnedcall.callback(data.result);
         pendingcalls.splice(pendingcalls.indexOf(returnedcall), 1);
     }
