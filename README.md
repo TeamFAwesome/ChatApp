@@ -11,7 +11,7 @@ python app.py
 
 ## Setup Client ##
 ```
-python3 -m http.server -m 9999
+python3 -m http.server 9999
 ```
 Then just navigate your browser to localhost:9999
 
