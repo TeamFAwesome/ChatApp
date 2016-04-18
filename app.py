@@ -1,7 +1,7 @@
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-import EIESWrapper
+from EIESWrapper import *
 import inspect
 
 clients = []
@@ -26,34 +26,41 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
         clients.remove(self)
 
 class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
-    def callFunctionWithJsonArguments(self, eies, funcname, arguments):
-        f = getattr(eies, funcname)
+    def callFunctionWithJsonArguments(self, funcname, arguments):
+        f = getattr(self.eies, funcname)
         return f(**{key:value for key,value in arguments.items() if key in inspect.getargspec(f)[0] and not key == "func"})
-
-    def __init__(self):
-        super(EIESWrapperHandler, self).__init__()
-        if attr(EIESWrapperHandler, "eises") == None:
-            EIESWrapperHandler.eises = {}
 
     def check_origin(self, origin):
         return True
 
     def open(self, *args):
         print("open", "EIESWrapperHelper")
+        self.eies = EIESWrapper()
         clients.append(self)
-        self.eises[self] = EIESWrapper()
 
-    def on_message(self, message):
-        if not "func" in message.keys():
-            print("UNSURE WHICH WRAPPED FUNCTION TO CALL: ",message)
-        else:
+    def on_message(self, msg):
+        print("Received api call to websocket wrapper: %s" % msg)
+        message = json.loads(msg)
+        print(message)
+        try:
+            if not "func" in message.keys():
+                message["result"] = "AMBIGUOUS FUNCTION CALLED"
+                for client in clients:
+                    client.write_message(json.dumps(message))
+                print("UNSURE WHICH WRAPPED FUNCTION TO CALL: ",message)
+            else:
+                for client in clients:
+                    message["result"] = client.callFunctionWithJsonArguments(message["func"], message)
+                    client.write_message(json.dumps(message))
+        except:
+            message["result"] = "general websocket explosion"
+            print("Fatal exception ocurred while trying to handle arguments and invoke. ungh.")
             for client in clients:
-                message["result"] = self.callFunctionWithJsonArguemtns(self.eises[client], message["func"], message)
-                client.write_message(message)
+                client.write_message(json.dumps(message))
+            raise
 
     def on_close(self):
         clients.remove(self)
-        self.eises
 
 
 # app = tornado.web.Application([(r'/chat', WebSocketChatHandler), (r'/', IndexHandler)])

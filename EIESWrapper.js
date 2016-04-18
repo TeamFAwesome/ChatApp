@@ -1,3 +1,6 @@
+/*
+ *  Eric McCann 2016
+ */
 var api = new WebSocket("ws://localhost:11000/api");
 var pendingcalls = []
 
@@ -12,20 +15,31 @@ api.onclose = function (e) {
 };
 
 api.onmessage = function (e) {
-    var data = JSON.parse(e.data);
     console.log("got message");
-    console.log(data);
+    console.log(e.data);
+    if (e.data == "web socket explosion")
+    {
+      console.log("fatal exception occured in python-land. purging pending call queue to unblock invokes")
+      for (var pendingcall in pendingcalls)
+      {
+        pendingcall["callback"](e.data);
+      }
+      pendingcalls = []
+      return;
+    }
+    var data = JSON.parse(e.data);
     returnedcall = null;
     for (var pendingcall in pendingcalls)
     {
-        if (data.func == pendingcall["func"])
+        if (data.func == pendingcalls[pendingcall].args.func)
         {
-            pendingargs = json.parse(pendingcall["args"]);
-            returnedargs = json.parse(data);
-            returnedcall = pendingcall;
+            console.log("Found pending call with correct func");
+            pendingargs = pendingcalls[pendingcall].args;
+        
+            returnedcall = pendingcalls[pendingcall];
             for (var arg in pendingargs)
             {
-                if (pendingargs[arg] != returnedargs[arg])
+                if (pendingargs[arg] != data[arg])
                 {
                     returnedcall = null;
                     break;
@@ -37,8 +51,13 @@ api.onmessage = function (e) {
     }
     if (returnedcall != null)
     {
-        returnedcall["callback"](data["result"]);
-        pendingcalls.splice(array.indexOf(returnedcall), 1);
+        console.log("received response!");
+        console.log("returned:");
+        console.log(returnedcall);
+        console.log("data:");
+        console.log(data);
+        returnedcall.callback(data.result);
+        pendingcalls.splice(pendingcalls.indexOf(returnedcall), 1);
     }
     else
     {
@@ -51,142 +70,97 @@ var invoke = function (callback, funcname, args) {
     pendingcall = {};
     pendingcall["callback"] = callback;
     pendingcall["func"] = funcname;
-    pendingcall["args"] = json.stringify(args);
-    pendingcall["args"]["func"] = funcname;
-    pendingcalls.Add(pendingcall)
-    ws.send(JSON.stringify(pendingcall["args"]));
+    pendingcall["args"] = args;
+    pendingcall["args"].func = funcname;
+    pendingcalls.push(pendingcall);
+    api.send(JSON.stringify(pendingcall["args"]));
 }
 
 //// BEGIN SESSION
-function Login(email, password)
+function Login(callback, email, password)
 {
-  var r;
-  invoke(function(result){ r = result; }, "Login", {email: email, password: password});
-  while (!r) {}
-  return r;
+  invoke(callback, "Login", {email: email, password: password});
 }
-function Logout()
+function Logout(callback)
 {
-  var r;
-  invoke(function(result){ r = result; }, "Logout", {});
-  while (!r) {}
-  return r;
+  invoke(callback, "Logout", {});
 }
     
 //// END SESSION
     
     
 //// BEGIN USER INFO STUFF
-function GetUserInfo()
+function GetUserInfo(callback)
 {
-  var r;
-  invoke(function(result){ r = result; }, "GetUserInfo", {});
-  while (!r) {}
-  return r;
+  invoke(callback, "GetUserInfo", {});
 }
 //// BEGIN USER INFO STUFF
 
 
 //// BEGIN KEY STUFF
-function LookupPubKey(domain, port)
+function LookupPubKey(callback, domain, port)
 {
-  var r;
-  invoke(function(result){ r = result; }, "LookupPubKey", {domain: domain, port: port});
-  while (!r) {}
-  return r;
+  invoke(callback, "LookupPubKey", {domain: domain, port: port});
 }
 
-function NewKey(name, body)
+function NewKey(callback, name, body)
 {
-  var r;
-  invoke(function(result){ r = result; }, "NewKey", {name: name, body: body});
-  while (!r) {}
-  return r;
+  invoke(callback, "NewKey", {name: name, body: body});
 }
 
-function RetrieveKey(key_id)
+function RetrieveKey(callback, key_id)
 {
-  var r;
-  invoke(function(result){ r = result; }, "RetrieveKey", {key_id: key_id});
-  while (!r) {}
-  return r;
+  invoke(callback, "RetrieveKey", {key_id: key_id});
 }
 
-function UpdateKey(name, body)
+function UpdateKey(callback, name, body)
 {
-  var r;
-  invoke(function(result){ r = result; }, "UpdateKey", {name: name, body: body});
-  while (!r) {}
-  return r;
+  invoke(callback, "UpdateKey", {name: name, body: body});
 }
 
-function DestroyKey(key_id)
+function DestroyKey(callback, key_id)
 {
-  var r;
-  invoke(function(result){ r = result; }, "DestroyKey", {key_id});
-  while (!r) {}
-  return r;
+  invoke(callback, "DestroyKey", {key_id});
 }
 //// END KEY STUFF
 
 
 //// BEGIN ENTITY STUFF
-function NewEntity(name, domain, port)
+function NewEntity(callback, name, domain, port)
 {
-  var r;
-  invoke(function(result){ r = result; }, "NewEntity", {name: name, domain: domain, port: port});
-  while (!r) {}
-  return r;
+  invoke(callback, "NewEntity", {name: name, domain: domain, port: port});
 }
 
-function RetrieveEntity(entity_id)
+function RetrieveEntity(callback, entity_id)
 {
-  var r;
-  invoke(function(result){ r = result; }, "RetrieveEntity", {entity_id: entity_id});
-  while (!r) {}
-  return r;
+  invoke(callback, "RetrieveEntity", {entity_id: entity_id});
 }
 
-function UpdateEntity(name, domain, port)
+function UpdateEntity(callback, name, domain, port)
 {
-  var r;
-  invoke(function(result){ r = result; }, "UpdateEntity", {name: name, domain: domain, port: port});
-  while (!r) {}
-  return r;
+  invoke(callback, "UpdateEntity", {name: name, domain: domain, port: port});
 }
 
-function DestroyEntity(entity_id)
+function DestroyEntity(callback, entity_id)
 {
-  var r;
-  invoke(function(result){ r = result; }, "DestroyEntity", {entity_id: entity_id});
-  while (!r) {}
-  return r;
+  invoke(callback, "DestroyEntity", {entity_id: entity_id});
 }
 //// END ENTITY STUFF
 
 
 //// BEGIN ENTITY TOKEN STUFF
-function CreateEntityToken(entity_id, key_id)
+function CreateEntityToken(callback, entity_id, key_id)
 {
-  var r;
-  invoke(function(result){ r = result; }, "CreateEntityToken", {entity_id: entity_id, key_id: key_id});
-  while (!r) {}
-  return r;
+  invoke(callback, "CreateEntityToken", {entity_id: entity_id, key_id: key_id});
 }
 
-function RetrieveEntityToken(token_id, session_id)
+function RetrieveEntityToken(callback, token_id, session_id)
 {
-  var r;
-  invoke(function(result){ r = result; }, "RetrieveEntity", {token_id: token_id, session_id: session_id});
-  while (!r) {}
-  return r;
+  invoke(callback, "RetrieveEntity", {token_id: token_id, session_id: session_id});
 }
 
-function DestroyEntityToken(token_id, session_id)
+function DestroyEntityToken(callback, token_id, session_id)
 {
-  var r;
-  invoke(function(result){ r = result; }, "DestroyEntity", {token_id: token_id, session_id: session_id});
-  while (!r) {}
-  return r;
+  invoke(callback, "DestroyEntity", {token_id: token_id, session_id: session_id});
 }
 //// END ENTITY TOKEN STUFF

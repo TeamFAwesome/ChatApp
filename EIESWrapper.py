@@ -1,4 +1,9 @@
 #!/usr/bin/python3
+
+#
+#  Eric McCann 2016
+#
+
 from __future__ import print_function
 success = False
 try:
