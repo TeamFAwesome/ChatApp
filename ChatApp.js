@@ -36,11 +36,11 @@ app.controller("Main", function ($scope, $http) {
                 });
                 break;
             case 'buddy_online':
-                console.log("buddy: " + data.name + "is online");
+                console.log("buddy: " + data.name + " is online");
                 $scope.buddies.push(data.name);
                 break;
             case 'buddy_offline':
-                console.log("buddy: " + data.name + "is offline");
+                console.log("buddy: " + data.name + " is offline");
                 $scope.buddies.splice(buddies.index_of(data.name),1);
                 break
         }
@@ -58,7 +58,7 @@ app.controller("Main", function ($scope, $http) {
                 type: "msg",
                 author: data.author,
                 message: data.message,
-                destination: buddy
+                destination: $scope.buddies[buddy]
             }
             ws.send(JSON.stringify(message));
         }
