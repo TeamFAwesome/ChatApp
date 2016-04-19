@@ -55,7 +55,7 @@ app.controller("Main", function ($scope, $http) {
             author: $scope.username,
             message: $scope.text
         };
-        console.log("sending message: "+data);
+        console.log("sending message: "+JSON.stringify(data));
         for(var buddy in $scope.buddies)
         {
             var message = {
