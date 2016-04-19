@@ -90,9 +90,9 @@ function Logout(callback)
     
     
 //// BEGIN USER INFO STUFF
-function GetUserInfo(callback)
+function GetUserInfo(callback, user_id=null)
 {
-  invoke(callback, "GetUserInfo", {});
+  invoke(callback, "GetUserInfo", {user_id: user_id});
 }
 //// BEGIN USER INFO STUFF
 
