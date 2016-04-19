@@ -18,14 +18,14 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
         self.name = None
 
     def on_message(self, message):
+        print("RECEIVED: "+message);
         data = json.loads(message)
         if data["type"] == "hello":
             self.name = data["name"]
             if self in namelessclients:
                 namelessclients.remove(self)
             clients[self.name] = self
-            if not self.name in clients:
-                self.send_buddy_online()
+            self.send_buddy_online()
             print("HELLO %s! %d nameless, %d named" % (self.name, len(namelessclients), len(clients)))
         elif data["type"] == "msg":
             if not data["destination"] in clients.keys():

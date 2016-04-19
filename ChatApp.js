@@ -12,10 +12,6 @@ app.controller("Main", function ($scope, $http) {
 
     //var ws = WebsocketService.open();
     var ws = new WebSocket("ws://ashleymadisonrevenge.com:10000/chat");
-    ws.onopen = function() {
-        if ($scope.username)
-            ws.send(JSON.stringify({type: "hello", name: $scope.username}));
-    }
 
     // register onclose so that it will constantly retry
     ws.onclose = function (e) {
