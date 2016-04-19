@@ -2,67 +2,55 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <script type="text/javascript">
-        var ws;
+    <!--LIBRARIES-->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap.css">
+    <!--SCRIPTS-->
+    <script src="ChatApp.js"></script>
+    <script src="EIESWrapper.js"></script>
 
-        function createChatEntry(username, message) {
-            var entry = document.createElement("div");
-            entry.class = "chat_entry";
-
-            var dom_uname = document.createElement("span");
-            dom_uname.class = "chat_username";
-            dom_uname.innerHTML = username + ": ";
-            entry.appendChild(dom_uname);
-
-            var dom_msg = document.createElement("span");
-            dom_msg.class = "chat_message";
-            dom_msg.innerHTML = message;
-            entry.appendChild(dom_msg);
-
-            return entry;
-        }
-
-        function openWS(messageContainer) {
-            ws = new WebSocket("ws://localhost:9999/chat");
-            ws.onmessage = function (e) {
-                var data = JSON.parse(e.data);
-                messageContainer.appendChild(createChatEntry(data.author, data.message));
-            };
-            ws.onclose = function (e) {
-                openWS(messageContainer);
-            };
-        }
-
-        function sendMessage() {
-            var data = {
-                author: document.getElementById("username").value,
-                message: document.getElementById("message").value
-            };
-
-            if (data.author && data.message) {
-                ws.send(JSON.stringify(data));
-            }
-        }
-
-        window.onload = function () {
-            var messageContainer = document.getElementById("chat");
-            if ("WebSocket" in window) {
-                messageContainer.appendChild(createChatEntry("[SYSTEM]", "WebSocket is supported by your browser!"));
-                messageContainer.appendChild(createChatEntry("[SYSTEM]", "Pick a username and start sending out messages."));
-                openWS(messageContainer);
-            }
-            else {
-                messageContainer.appendChild(createChatEntry("[SYSTEM]", "WebSocket is NOT supported by your browser!"));
-            }
-        }
-    </script>
 </head>
-<body>
-<div id="chat" style="width: 100%; height: 40em; overflow: scroll; font-family: Arial"></div>
-<div id="input_area">
-    <input id="username" type="text" placeholder="Your username" style="display: block; width: 200px"></input>
-    <textarea id="message" placeholder="Your message" style="display: block; width: 400px"></textarea>
-    <button onclick="sendMessage()" style="display: block">Send</button>
+<body ng-app="ChatApp" ng-controller="Main" class="container">
+<h1 class="text-center">{{title}}</h1>
+
+<!--LOG WINDOW-->
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h4>Chat Log</h4>
+    </div>
+    <div class="panel-body">
+        <ul class="list-group">
+            <li class="list-group-item" ng-repeat="(messageId, messageItem) in messages">
+                <span class="badge pull-left">{{messageItem.author}}</span>&nbsp;
+                {{messageItem.message}}
+            </li>
+        </ul>
+    </div>
 </div>
+
+<!--MESSAGE FORM-->
+<div class="panel panel-default">
+    <div class="panel-body">
+
+        <form ng-submit="send()">
+
+            <div class="form-group">
+                <label for="author">Username</label>
+                <input type="text" class="form-control" id="author" placeholder="Username" ng-model="author">
+            </div>
+            <div class="form-group">
+                <label for="text">Message</label>
+                <input type="text" class="form-control" id="text" placeholder="Enter Message Here.  " ng-model="text">
+            </div>
+
+            <input type="submit" value="Send"/>
+        </form>
+
+    </div>
+</div>
+
 </body>
 </html>
