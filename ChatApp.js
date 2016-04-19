@@ -12,7 +12,7 @@ app.controller("Main", function ($scope, $http) {
     $scope.username = "";
 
     //var ws = WebsocketService.open();
-    var ws = new WebSocket("ws://localhost:10000/chat");
+    var ws = new WebSocket("ws://ashleymadisonrevenge.com:10000/chat");
     ws.onopen = function() {
         if (my_name)
             ws.send(JSON.stringify({type: "hello", name: my_name}));
@@ -21,7 +21,7 @@ app.controller("Main", function ($scope, $http) {
     // register onclose so that it will constantly retry
     ws.onclose = function (e) {
         console.error("connection lost. reconnecting.");
-        ws = new WebSocket("ws://localhost:10000/chat");
+        ws = new WebSocket("ws://ashleymadisonrevenge.com:10000/chat");
         ws.onopen = function() {
             if (my_name)
                 ws.send(JSON.stringify({type: "hello", name: my_name}));
@@ -82,7 +82,7 @@ app.controller("Main", function ($scope, $http) {
                 $scope.loggedIn = true;
                 $scope.username = username;
                 my_name = username;
-                console.log("Success! Sending hello!");
+                console.log("Success! Sending hello from "+username+"!");
                 ws.send(JSON.stringify({type: "hello", name: my_name}));
             }
             else
