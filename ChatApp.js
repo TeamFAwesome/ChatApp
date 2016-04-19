@@ -25,8 +25,6 @@ app.controller("Main", function ($scope, $http) {
 
     ws.onmessage = function (e) {
         var data = JSON.parse(e.data);
-        console.log("got message");
-        console.log(data);
         switch (data.type)
         {
             case 'msg':
