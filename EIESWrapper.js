@@ -67,6 +67,11 @@ api.onmessage = function (e) {
 };
 
 var invoke = function (callback, funcname, args) {
+    if (! (callback instanceof Function))
+    {
+        console.log("ERROR: no callback function specified!");
+        return;
+    }
     pendingcall = {};
     pendingcall["callback"] = callback;
     pendingcall["func"] = funcname;
