@@ -75,7 +75,8 @@ app.controller("Main", function ($scope, $http) {
             {
                 var myPubkeyFromEIES;
                 LookupPubKey(function(res){
-                    myPubkeyFromEIES = res;
+                    if (!(Object.keys(res).length === 0 && JSON.stringify(res) === JSON.stringify({}))) //http://stackoverflow.com/a/32108184
+                        myPubkeyFromEIES = res;
                     console.log("Found pubkey: "+JSON.stringify(res));
                 }, "ChatApp:"+username, null);
                 $scope.$apply(function () {
