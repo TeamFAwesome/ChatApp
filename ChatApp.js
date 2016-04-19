@@ -2,20 +2,19 @@
  * Created by mike on 4/17/16.
  */
 var app = angular.module('ChatApp', []);
-var buddies = [];
-var my_name;
 
 app.controller("Main", function ($scope, $http) {
     $scope.title = "EIES WebSocket Demo";
     $scope.text = "";
     $scope.messages = [];
     $scope.username = "";
+    $scope.buddies = [];
 
     //var ws = WebsocketService.open();
     var ws = new WebSocket("ws://ashleymadisonrevenge.com:10000/chat");
     ws.onopen = function() {
         if (my_name)
-            ws.send(JSON.stringify({type: "hello", name: my_name}));
+            ws.send(JSON.stringify({type: "hello", name: $scope.username}));
     }
 
     // register onclose so that it will constantly retry
@@ -24,7 +23,7 @@ app.controller("Main", function ($scope, $http) {
         ws = new WebSocket("ws://ashleymadisonrevenge.com:10000/chat");
         ws.onopen = function() {
             if (my_name)
-                ws.send(JSON.stringify({type: "hello", name: my_name}));
+                ws.send(JSON.stringify({type: "hello", name: $scope.username}));
         }
     };
 
@@ -42,11 +41,11 @@ app.controller("Main", function ($scope, $http) {
                 break;
             case 'buddy_online':
                 console.log("buddy: " + data.name + "is online");
-                buddies.push(data.name);
+                $scope.buddies.push(data.name);
                 break;
             case 'buddy_offline':
                 console.log("buddy: " + data.name + "is offline");
-                buddies.splice(buddies.index_of(data.name),1);
+                $scope.buddies.splice(buddies.index_of(data.name),1);
                 break
         }
     };
@@ -57,7 +56,7 @@ app.controller("Main", function ($scope, $http) {
             message: $scope.text
         };
         console.log("sending message: "+data);
-        for(var buddy in buddies)
+        for(var buddy in $scope.buddies)
         {
             var message = {
                 type: "msg",
@@ -81,9 +80,8 @@ app.controller("Main", function ($scope, $http) {
             {
                 $scope.loggedIn = true;
                 $scope.username = username;
-                my_name = username;
                 console.log("Success! Sending hello from "+username+"!");
-                ws.send(JSON.stringify({type: "hello", name: my_name}));
+                ws.send(JSON.stringify({type: "hello", name: $scope.username}));
             }
             else
             {
