@@ -3,24 +3,21 @@ The chat app that integrates with EIES security as a demo.
 This app was based on some python websocket starter code found here,
 http://iot-projects.com/index.php?id=websocket-a-simple-example
 
-## Setup Server ##
+## Setup+Run Chat client ##
 ```
-virtualenv venv -p python3
-source venv/bin/activate
-pip3 install -r requirements.txt
-python3 app.py
-```
-
-## Setup Client ##
-```
-python3 -m http.server 9999
+./runclient.sh
 ```
 Then just navigate your browser to localhost:9999
 
+## Setup+Run Centralized Chat Server ##
+```
+./runserver.sh
+```
+The chat server is running at the endpoint specified in ChatApp.js, and would need reconfiguration to run elsewhere.
 
 ## Under the Hood of EIESWrapper and its integration ##
 
-tl;dr: EIESWrapper is used directly by ChatApp.js
+tl;dr: EIESWrapper is used directly by ChatApp.js (localhost-only websockets). All message crypto happens on the localhost before transmission.
 
 EIESWrapper.py is a trivial requests session wrapper to expose the EIES api calls in python
 It can be used directly on a CLI, or integrated into python code.
