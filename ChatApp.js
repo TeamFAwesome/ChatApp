@@ -41,7 +41,7 @@ app.controller("Main", function ($scope, $http) {
                 break;
             case 'buddy_offline':
                 console.log("buddy: " + data.name + " is offline");
-                $scope.buddies.splice(buddies.index_of(data.name),1);
+                $scope.buddies.splice($scope.buddies.index_of(data.name),1);
                 break
         }
     };
