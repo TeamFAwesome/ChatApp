@@ -60,7 +60,7 @@ app.controller("Main", function ($scope, $http) {
                 message: data.message,
                 destination: buddy
             }
-            ws.send(JSON.stringify(data));
+            ws.send(JSON.stringify(message));
         }
 
         // reset scope
