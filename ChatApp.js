@@ -74,11 +74,20 @@ app.controller("Main", function ($scope, $http) {
 
     $scope.loggedIn = false;
     $scope.login = function (username, password) {
+        console.log("Logging in as "+username);
         Login(function(result){
+            console.log(result);
             if (result)
             {
-            	$scope.loggedIn = true;
-            	$scope.username = username;
+                $scope.loggedIn = true;
+                $scope.username = username;
+                my_name = username;
+                console.log("Success! Sending hello!");
+                ws.send(JSON.stringify({type: "hello", name: my_name}));
+            }
+            else
+            {
+                console.log("Failed to log in!\n"+result);
             }
         }, username, password);
     };
