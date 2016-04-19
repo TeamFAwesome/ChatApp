@@ -73,6 +73,11 @@ app.controller("Main", function ($scope, $http) {
             console.log(result);
             if (result)
             {
+                var myPubkeyFromEIES;
+                LookupPubKey(function(res){
+                    myPubkeyFromEIES = res;
+                    console.log("Found pubkey: "+JSON.stringify(res));
+                }, "ChatApp:"+username, null);
                 $scope.$apply(function () {
                     $scope.loggedIn = true;
                     $scope.username = username;
