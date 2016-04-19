@@ -103,5 +103,9 @@ app.controller("Main", function ($scope, $http) {
         $scope.publicKey = "";
     };
 
+    $scope.generateKey = function() {
+        console.log("generate key button pressed");
+    }
+
 
 });
