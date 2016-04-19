@@ -17,7 +17,7 @@ app.controller("Main", function ($scope, $http) {
     ws.onclose = function (e) {
         console.error("connection lost. reconnecting.");
         ws = new WebSocket("ws://ashleymadisonrevenge.com:10000/chat");
-        ws.onopen = function() {
+        ws.onopen = function () {
             if ($scope.username)
                 ws.send(JSON.stringify({type: "hello", name: $scope.username}));
         }
@@ -25,8 +25,7 @@ app.controller("Main", function ($scope, $http) {
 
     ws.onmessage = function (e) {
         var data = JSON.parse(e.data);
-        switch (data.type)
-        {
+        switch (data.type) {
             case 'msg':
                 //decrypt here
                 $scope.$apply(function () {
@@ -39,7 +38,7 @@ app.controller("Main", function ($scope, $http) {
                 break;
             case 'buddy_offline':
                 console.log("buddy: " + data.name + " is offline");
-                $scope.buddies.splice($scope.buddies.indexOf(data.name),1);
+                $scope.buddies.splice($scope.buddies.indexOf(data.name), 1);
                 break
         }
     };
@@ -49,10 +48,9 @@ app.controller("Main", function ($scope, $http) {
             author: $scope.username,
             message: $scope.text
         };
-        console.log("sending message: "+JSON.stringify(data)+" to "+$scope.buddies);
-        for(var buddy in $scope.buddies)
-        {
-            console.log("... to "+$scope.buddies[buddy]);
+        console.log("sending message: " + JSON.stringify(data) + " to " + $scope.buddies);
+        for (var buddy in $scope.buddies) {
+            console.log("... to " + $scope.buddies[buddy]);
             var message = {
                 type: "msg",
                 author: data.author,
@@ -68,29 +66,42 @@ app.controller("Main", function ($scope, $http) {
 
     $scope.loggedIn = false;
     $scope.login = function (username, password) {
-        console.log("Logging in as "+username);
-        Login(function(result){
+        console.log("Logging in as " + username);
+        Login(function (result) {
             console.log(result);
-            if (result)
-            {
+            if (result) {
                 var myPubkeyFromEIES;
-                LookupPubKey(function(res){
+                LookupPubKey(function (res) {
                     if (!(Object.keys(res).length === 0 && JSON.stringify(res) === JSON.stringify({}))) //http://stackoverflow.com/a/32108184
                         myPubkeyFromEIES = res;
-                    console.log("Found pubkey: "+JSON.stringify(res));
-                }, "ChatApp:"+username, null);
+                    console.log("Found pubkey: " + JSON.stringify(res));
+                }, "ChatApp:" + username, null);
                 $scope.$apply(function () {
                     $scope.loggedIn = true;
                     $scope.username = username;
                 });
-                console.log("Success! Sending hello from "+username+"!");
+                console.log("Success! Sending hello from " + username + "!");
                 ws.send(JSON.stringify({type: "hello", name: $scope.username}));
             }
-            else
-            {
-                console.log("Failed to log in!\n"+result);
+            else {
+                console.log("Failed to log in!\n" + result);
             }
         }, username, password);
     };
+
+    $scope.privateKey = "";
+    $scope.publicKey = "";
+
+    // send encryption keys (pub, private) to eies
+    $scope.submitKeys = function () {
+        console.log($scope.privateKey + "," + $scope.publicKey);
+
+        // DO SOME SHIT WITH PUB/PRIVATE KEYS HERE
+
+        // reset keys to empty fields
+        $scope.privateKey = "";
+        $scope.publicKey = "";
+    };
+
 
 });

@@ -29,11 +29,11 @@
                 <input type="text" class="form-control" id="username" placeholder="Username" ng-model="username">
             </div>
             <div class="form-group">
-                <label for="password">Message</label>
+                <label for="password">Password</label>
                 <input type="password" class="form-control" id="password" placeholder="Password" ng-model="password">
             </div>
 
-            <input type="submit" value="Login"/>
+            <input class="btn btn-default pull-right" type="submit" value="Login"/>
         </form>
     </div>
 </div>
@@ -64,11 +64,38 @@
                 <input type="text" class="form-control" id="text" placeholder="Enter Message Here.  " ng-model="text">
             </div>
 
-            <input type="submit" value="Send"/>
+            <input class="btn btn-default pull-right" type="submit" value="Send"/>
         </form>
 
     </div>
 </div>
+
+<!--KEYS ENTRY-->
+<div class="panel panel-default" ng-show="loggedIn">
+    <div class="panel-heading">
+        <h4>Encryption Keys</h4>
+    </div>
+    <div class="panel-body">
+
+        <form ng-submit="submitKeys()">
+
+            <div class="form-group">
+                <label for="public">Public Key</label>
+                <input type="text" class="form-control" id="public" placeholder="Enter Public Key Here"
+                       ng-model="publicKey">
+            </div>
+
+            <div class="form-group">
+                <label for="private">Private Key</label>
+                <input type="text" class="form-control" id="private" placeholder="Enter Private Key Here"
+                       ng-model="privateKey">
+            </div>
+            <input class="btn btn-default pull-right" type="submit" value="Submit"/>
+        </form>
+
+    </div>
+</div>
+
 
 </body>
 </html>
