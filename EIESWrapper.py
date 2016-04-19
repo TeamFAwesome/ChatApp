@@ -1,4 +1,9 @@
 #!/usr/bin/python3
+
+#
+#  Eric McCann 2016
+#
+
 from __future__ import print_function
 success = False
 try:
@@ -118,10 +123,10 @@ class EIESWrapper:
     def CreateEntityToken(self, entity_id, key_id):
         return self.__exec(self.session.post, 'entity_tokens', {'session_id': self.session_id, 'entity_id': entity_id, 'key_id': key_id}).json()
         
-    def RetrieveEntity(self, token_id, session_id):
+    def RetrieveEntityToken(self, token_id, session_id):
         return self.__exec(self.session.get, 'entity_tokens/%d' % token_id, {'session_id': self.session_id}).json()
     
-    def DestroyEntity(self, token_id, session_id):
+    def DestroyEntityToken(self, token_id, session_id):
         return self.__exec(self.session.delete, 'entities_tokens/%d', {'session_id': self.session_id}).json()
     ### END ENTITY TOKEN STUFF
 
