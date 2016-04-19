@@ -27,8 +27,13 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
 
 class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
     def callFunctionWithJsonArguments(self, funcname, arguments):
-        f = getattr(self.eies, funcname)
-        return f(**{key:value for key,value in arguments.items() if key in inspect.getargspec(f)[0] and not key == "func"})
+        try:
+            f = getattr(self.eies, funcname)
+            return f(**{key:value for key,value in arguments.items() if key in inspect.getargspec(f)[0] and not key == "func"})
+        except TypeError as e:
+            return {"error": str(e)}
+        except:
+            raise
 
     def check_origin(self, origin):
         return True
