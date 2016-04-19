@@ -16,8 +16,30 @@
 <body ng-app="ChatApp" ng-controller="Main" class="container">
 <h1 class="text-center">{{title}}</h1>
 
+<!--LOGIN PANEL-->
+<div class="panel panel-warning" ng-show="!loggedIn">
+    <div class="panel-heading">
+        <h4>Login</h4>
+    </div>
+    <div class="panel-body">
+        <form ng-submit="login(username,password)">
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" placeholder="Username" ng-model="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Message</label>
+                <input type="password" class="form-control" id="password" placeholder="Password" ng-model="password">
+            </div>
+
+            <input type="submit" value="Login"/>
+        </form>
+    </div>
+</div>
+
 <!--LOG WINDOW-->
-<div class="panel panel-primary">
+<div class="panel panel-primary" ng-show="loggedIn">
     <div class="panel-heading">
         <h4>Chat Log</h4>
     </div>
@@ -32,15 +54,11 @@
 </div>
 
 <!--MESSAGE FORM-->
-<div class="panel panel-default">
+<div class="panel panel-default" ng-show="loggedIn">
     <div class="panel-body">
 
         <form ng-submit="send()">
 
-            <div class="form-group">
-                <label for="author">Username</label>
-                <input type="text" class="form-control" id="author" placeholder="Username" ng-model="author">
-            </div>
             <div class="form-group">
                 <label for="text">Message</label>
                 <input type="text" class="form-control" id="text" placeholder="Enter Message Here.  " ng-model="text">

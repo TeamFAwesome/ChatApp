@@ -7,9 +7,9 @@ var my_name;
 
 app.controller("Main", function ($scope, $http) {
     $scope.title = "EIES WebSocket Demo";
-    $scope.author = "";
     $scope.text = "";
     $scope.messages = [];
+    $scope.username = "";
 
     //var ws = WebsocketService.open();
     var ws = new WebSocket("ws://localhost:10000/chat");
@@ -53,7 +53,7 @@ app.controller("Main", function ($scope, $http) {
 
     $scope.send = function () {
         var data = {
-            author: $scope.author,
+            author: $scope.username,
             message: $scope.text
         };
         console.log("sending message: "+data);
@@ -70,6 +70,17 @@ app.controller("Main", function ($scope, $http) {
 
         // reset scope
         $scope.text = "";
+    };
+
+    $scope.loggedIn = false;
+    $scope.login = function (username, password) {
+        Login(function(result){
+            if (result)
+            {
+            	$scope.loggedIn = true;
+            	$scope.username = username;
+            }
+        }, username, password);
     };
 
 });
