@@ -78,8 +78,10 @@ app.controller("Main", function ($scope, $http) {
             console.log(result);
             if (result)
             {
-                $scope.loggedIn = true;
-                $scope.username = username;
+                $scope.$apply(function () {
+                    $scope.loggedIn = true;
+                    $scope.username = username;
+                });
                 console.log("Success! Sending hello from "+username+"!");
                 ws.send(JSON.stringify({type: "hello", name: $scope.username}));
             }
