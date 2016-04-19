@@ -3,7 +3,7 @@
  */
 var app = angular.module('ChatApp', []);
 
-app.controller("Main", function ($scope, $http, EIESWrapper) {
+app.controller("Main", function ($scope, $http) {
     $scope.title = "EIES WebSocket Demo";
     $scope.author = "";
     $scope.text = "";
