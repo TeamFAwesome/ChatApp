@@ -161,11 +161,11 @@ function CreateEntityToken(callback, entity_id, key_id)
 
 function RetrieveEntityToken(callback, token_id, session_id)
 {
-  invoke(callback, "RetrieveEntity", {token_id: token_id, session_id: session_id});
+  invoke(callback, "RetrieveEntityToken", {token_id: token_id, session_id: session_id});
 }
 
 function DestroyEntityToken(callback, token_id, session_id)
 {
-  invoke(callback, "DestroyEntity", {token_id: token_id, session_id: session_id});
+  invoke(callback, "DestroyEntityToken", {token_id: token_id, session_id: session_id});
 }
 //// END ENTITY TOKEN STUFF
