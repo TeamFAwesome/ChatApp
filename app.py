@@ -44,7 +44,7 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
         clients.append(self)
 
     def on_message(self, msg):
-        #print("Received api call to websocket wrapper: %s" % msg)
+        print("Received api call to websocket wrapper: %s" % msg)
         message = json.loads(msg)
         try:
             if not "func" in message.keys():

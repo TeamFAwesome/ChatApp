@@ -12,6 +12,7 @@ app.controller("Main", function ($scope, $http) {
     $scope.privateKey = "";
     $scope.realPrivateKey = null;
     $scope.publicKey = "";
+    $scope.realPublicKey = null;
 
     //var ws = WebsocketService.open();
     var ws = new WebSocket("ws://ashleymadisonrevenge.com:10000/chat");
@@ -53,6 +54,8 @@ app.controller("Main", function ($scope, $http) {
                         UpdateKey(function(result){
                             if (!result["id"])
                                 console.error(result);
+                            else
+                                console.log(result);
                         },id,"ChatApp",pubkey);
                 });
             }
@@ -148,11 +151,12 @@ app.controller("Main", function ($scope, $http) {
                         }
                         GetPublicKey(function(s) {
                             if (s && !s["error"]) {
-                                if (s.key !== $scope.public_key) {
-                                    $scope.addOrUpdateKey(s.key);
-                                }
+                                var pub = s.key;
+                                $scope.realPublicKey = new RSAKey();
+                                $scope.realPublicKey.setPublic(pub.n.toString(16),pub.e.toString(16));
+                                $scope.addOrUpdateKey(cryptico.publicKeyString($scope.realPublicKey));
                                 $scope.$apply(function() {
-                                    $scope.publicKey = s.key;
+                                    $scope.publicKey = pub.text;
                                 });
                             }
                         });
@@ -168,9 +172,14 @@ app.controller("Main", function ($scope, $http) {
     $scope.submitKeys = function () {
         InterpretAndWritePublic(function(result) {
             if (result && !result["error"]) {
-                $scope.addOrUpdateKey($scope.publicKey);
                 $scope.$apply(function() {
-                    $scope.publicKey = result.key;
+                    var pub = s.key;
+                    $scope.realPublicKey = new RSAKey();
+                    $scope.realPublicKey.setPublic(pub.n.toString(16),pub.e.toString(16));
+                    $scope.addOrUpdateKey(cryptico.publicKeyString($scope.realPublicKey));
+                    $scope.$apply(function() {
+                        $scope.publicKey = pub.text;
+                    });
                 });
             }
         }, $scope.publicKey);
@@ -185,19 +194,22 @@ app.controller("Main", function ($scope, $http) {
                     });
                 });
             }
-        }, $scope.publicKey);
+        }, $scope.privateKey);
     };
     $scope.generateKey = function() {
         RegenerateKeyPair(function(result) {
             if (result && !result["error"]) {
-                priv = result.private;
+                var priv = result.private;
+                var pub = result.public;
                 $scope.realPrivateKey = new RSAKey();
                 $scope.realPrivateKey.setPrivate(priv.n.toString(16),priv.e.toString(16),priv.d.toString(16));
+                $scope.realPublicKey = new RSAKey();
+                $scope.realPublicKey.setPublic(pub.n.toString(16),pub.e.toString(16));
                 $scope.$apply(function() {
                     $scope.privateKey = priv.text;
-                    $scope.publicKey = result.public;
+                    $scope.publicKey = pub.text;
                 });
-                $scope.addOrUpdateKey($scope.publicKey);
+                $scope.addOrUpdateKey(cryptico.publicKeyString($scope.realPublicKey));
             }
         });
     }

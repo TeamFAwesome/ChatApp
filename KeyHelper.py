@@ -123,7 +123,9 @@ class KeyHelperRuntimeHandler:
             self.private_key = RSA.importKey(bytes(self.private_key_text,'utf8'))
 
         # read public key
-        self.public_key = self.Read(self.public_file, "public key")
+        self.public_key_text = self.Read(self.public_file, "public key")
+        if self.public_key_text != None:
+            self.public_key_text = RSA.importKey(bytes(self.public_key_text,'utf8'))
 
         if self.private_key and self.public_key:
             return True
@@ -133,12 +135,12 @@ class KeyHelperRuntimeHandler:
         #http://stackoverflow.com/a/22449476
         key = RSA.generate(1024, os.urandom)
         self.private_key = key
-        self.private_key_text = key.exportKey('PEM').decode('utf-8')
+        self.private_key_text = key.exportKey().decode('utf-8')
         self.Write(self.private_file, self.private_key_text, "private key")
         os.chmod(self.private_file, 0o600)
-        pubkey = key.publickey()
-        self.public_key = pubkey.exportKey('PEM').decode('utf-8')
-        self.Write(self.public_file, self.public_key, "public key")
+        self.public_key = key.publickey()
+        self.public_key_text = self.public_key.exportKey().decode('utf-8')
+        self.Write(self.public_file, self.public_key_text, "public key")
         return True
 
     def _getPrivateKey(self):
@@ -148,7 +150,7 @@ class KeyHelperRuntimeHandler:
         return {"key": self._getPrivateKey()}
 
     def _getPublicKey(self):
-        return self.public_key
+        return {"n": self.public_key.n, "e": self.public_key.e, "text": self.public_key_text}
 
     def GetPublicKey(self):
         return {"key": self._getPublicKey()}
@@ -188,3 +190,4 @@ if __name__ == "__main__":
         impl.Create()
     print(impl.GetPrivateKey())
     print(impl.GetPublicKey())
+    code.interact(banner="Object \"impl\" initialized with current private and public keys... stored places. Good luck!",local=locals())
