@@ -44,9 +44,8 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
         clients.append(self)
 
     def on_message(self, msg):
-        print("Received api call to websocket wrapper: %s" % msg)
+        #print("Received api call to websocket wrapper: %s" % msg)
         message = json.loads(msg)
-        print(message)
         try:
             if not "func" in message.keys():
                 message["result"] = "AMBIGUOUS FUNCTION CALLED"
@@ -56,7 +55,7 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
             else:
                 for client in clients:
                     message["result"] = client.callFunctionWithJsonArguments(message["func"], message)
-                    print("RESULT: %s" % json.dumps(message));
+                    #print("RESPONDING: %s" % json.dumps(message["result"]))
                     client.write_message(json.dumps(message))
         except:
             message["result"] = "general websocket explosion"
