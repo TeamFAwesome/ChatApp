@@ -104,8 +104,8 @@ function RetrieveKey(callback, key_id) {
     invoke(callback, "RetrieveKey", {key_id: key_id});
 }
 
-function UpdateKey(callback, name, body) {
-    invoke(callback, "UpdateKey", {name: name, body: body});
+function UpdateKey(callback, key_id, name, body) {
+    invoke(callback, "UpdateKey", {key_id: key_id, name: name, body: body});
 }
 
 function DestroyKey(callback, key_id) {
@@ -123,8 +123,8 @@ function RetrieveEntity(callback, entity_id) {
     invoke(callback, "RetrieveEntity", {entity_id: entity_id});
 }
 
-function UpdateEntity(callback, name, domain, port) {
-    invoke(callback, "UpdateEntity", {name: name, domain: domain, port: port});
+function UpdateEntity(callback, entity_id, name, domain, port) {
+    invoke(callback, "UpdateEntity", {entity_id: entity_id, name: name, domain: domain, port: port});
 }
 
 function DestroyEntity(callback, entity_id) {

@@ -106,8 +106,8 @@ class EIESWrapper:
     def RetrieveKey(self, key_id):
         return self.__exec(self.session.get, 'keys/%d' % key_id, {'session_id': self.session_id}).json()
     
-    def UpdateKey(self, name, body):
-        return self.__exec(self.session.put, 'keys', {'session_id': self.session_id, 'name': name, 'body': body})
+    def UpdateKey(self, key_id, name, body):
+        return self.__exec(self.session.put, 'keys/%d' % key_id, {'session_id': self.session_id, 'name': name, 'body': body}).json()
         
     def DestroyKey(self, key_id):
         return self.__exec(self.session.delete, 'keys/%d' % key_id, {'session_id': self.session_id}).json()
@@ -121,8 +121,8 @@ class EIESWrapper:
     def RetrieveEntity(self, entity_id):
         return self.__exec(self.session.get, 'entities/%d' % entity_id, {'session_id': self.session_id}).json()
     
-    def UpdateEntity(self, name, domain, port):
-        return self.__exec(self.session.put, 'entities', {'session_id': self.session_id, 'name': name, 'domain': domain, 'port': port}).json()
+    def UpdateEntity(self, entity_id, name, domain, port):
+        return self.__exec(self.session.put, 'entities/%d' % entity_id, {'session_id': self.session_id, 'name': name, 'domain': domain, 'port': port}).json()
         
     def DestroyEntity(self, entity_id):
         return self.__exec(self.session.delete, 'entities/%d' % entity_id, {'session_id': self.session_id}).json()

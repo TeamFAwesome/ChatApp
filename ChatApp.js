@@ -45,7 +45,15 @@ app.controller("Main", function ($scope, $http) {
                     }, "ChatApp", "ChatApp:"+$scope.username, null);
                 },"ChatApp",$scope.publicKey);
             } else {
-                UpdateKey(function(result){console.log(result);},"ChatApp",$scope.publicKey);
+                GetUserInfo(function(infores) {
+                    var id = -1;
+                    for (var i in infores.keys) {
+                        if (infores.keys[i].name == "ChatApp") {
+                            id = infores.keys[i].id;
+                        }
+                    }
+                    UpdateKey(function(result){console.log(result);},id,"ChatApp",$scope.publicKey);
+                });
             }
         }, $scope.username);
     }
