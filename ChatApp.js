@@ -23,7 +23,6 @@ app.controller("Main", function ($scope, $http) {
                 key = "";
             else
                 key = res[0].key.body;
-            console.log("pubkey for "+username+" is "+key);
             callback(key);
         }, "ChatApp:"+username, null);
     }
@@ -33,11 +32,7 @@ app.controller("Main", function ($scope, $http) {
             if (res.length == 0) {
                 NewKey(function(result){
                     var key_id = result.id;
-                    console.log("NewKeyResult");
-                    console.log(JSON.stringify(result));
                     NewEntity(function(entres){
-                        console.log("NewEntityResult");
-                        console.log(JSON.stringify(entres));
                         var entity_id = entres.id;
                         CreateEntityToken(function(tokres){
                             console.log("If the following json means good things, then you deserve a high five.");
@@ -56,7 +51,8 @@ app.controller("Main", function ($scope, $http) {
                     }
                     if (id != -1)
                         UpdateKey(function(result){
-                            console.log(result);
+                            if (!result["id"])
+                                console.error(result);
                         },id,"ChatApp",pubkey);
                 });
             }
@@ -101,10 +97,8 @@ app.controller("Main", function ($scope, $http) {
             author: $scope.username,
             message: $scope.text
         };
-        console.log("sending message: " + JSON.stringify(data) + "...");
         for (var b in $scope.buddies) {
             var buddy = $scope.buddies[b];
-            console.log("... to " + buddy);
             $scope.getPubKey(function(res){
                 if (res.length == 0) {
                     console.log("UNABLE TO LOOK UP PUBKEY FOR: ChatApp:"+buddy);
@@ -138,15 +132,12 @@ app.controller("Main", function ($scope, $http) {
                 console.log("Success! Sending hello from " + username + "!");
                 ws.send(JSON.stringify({type: "hello", name: $scope.username}));
                 $scope.getPubKey(function(key) {
-                    console.log("Looking up current public key in login");
                     if (key.length != 0) {
                         $scope.$apply(function () {
                             $scope.publicKey = key;
                         });
                     }
                     GetPrivateKey(function(r) {
-                        console.log("GetPrivateKey");
-                        console.log(r);
                         if (r && !r["error"]) {
                             var priv = r.key;
                             $scope.realPrivateKey = new RSAKey();
@@ -156,8 +147,6 @@ app.controller("Main", function ($scope, $http) {
                             });
                         }
                         GetPublicKey(function(s) {
-                            console.log("GetPublicKey");
-                            console.log(s);
                             if (s && !s["error"]) {
                                 if (s.key !== $scope.public_key) {
                                     $scope.addOrUpdateKey(s.key);
@@ -178,8 +167,6 @@ app.controller("Main", function ($scope, $http) {
     // send encryption keys (pub, private) to eies
     $scope.submitKeys = function () {
         InterpretAndWritePublic(function(result) {
-            console.log("Submit:InterpretAndWritePublic");
-            console.log(result);
             if (result && !result["error"]) {
                 $scope.addOrUpdateKey($scope.publicKey);
                 $scope.$apply(function() {
@@ -188,8 +175,6 @@ app.controller("Main", function ($scope, $http) {
             }
         }, $scope.publicKey);
         InterpretAndWritePrivate(function(result) {
-            console.log("Submit:InterpretAndWritePrivate");
-            console.log(result);
             if (result && !result["error"]) {
                 $scope.$apply(function() {
                     var priv = result.key;
@@ -204,8 +189,6 @@ app.controller("Main", function ($scope, $http) {
     };
     $scope.generateKey = function() {
         RegenerateKeyPair(function(result) {
-            console.log("generateKey");
-            console.log(result);
             if (result && !result["error"]) {
                 priv = result.private;
                 $scope.realPrivateKey = new RSAKey();
