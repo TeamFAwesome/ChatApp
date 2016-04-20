@@ -1,5 +1,5 @@
 venv/
 .idea/
-EIESWrapper.pyc
+*.pyc
 __pycache__/
 venv_server/

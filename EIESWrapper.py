@@ -1,10 +1,12 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 #
 #  Eric McCann 2016
 #
 
-from __future__ import print_function
+from Common import *
+printerer.Instance().setPrefixer() #singleton for prefixing prints with file and number
+
 success = False
 try:
     import requests,json,time,datetime
