@@ -17,6 +17,8 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
             # check for named function on keyhelper
             if (hasattr(self.keyhelper, funcname)):
                 f = getattr(self.keyhelper, funcname)
+                if len(arguments)==1 and arguments["func"] != None:
+                    return f()
                 return f(**{key:value for key,value in arguments.items() if key in inspect.getargspec(f)[0] and not key == "func"})
             # if function wasn't on keyhelper, call it on eies OR DIE TRYING
             f = getattr(self.eies, funcname)
@@ -54,6 +56,7 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
             else:
                 for client in clients:
                     message["result"] = client.callFunctionWithJsonArguments(message["func"], message)
+                    print("RESULT: %s" % json.dumps(message));
                     client.write_message(json.dumps(message))
         except:
             message["result"] = "general websocket explosion"

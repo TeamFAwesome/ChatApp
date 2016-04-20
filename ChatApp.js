@@ -10,6 +10,7 @@ app.controller("Main", function ($scope, $http) {
     $scope.username = "";
     $scope.buddies = [];
     $scope.privateKey = "";
+    $scope.realPrivateKey = null;
     $scope.publicKey = "";
 
     //var ws = WebsocketService.open();
@@ -50,25 +51,16 @@ app.controller("Main", function ($scope, $http) {
                     for (var i in infores.keys) {
                         if (infores.keys[i].name == "ChatApp") {
                             id = infores.keys[i].id;
+                            break;
                         }
                     }
-                    UpdateKey(function(result){
-                        console.log(result);
-                        $scope.$apply(function(){
-                            $scope.publicKey = result.body;
-                        });
-                    },id,"ChatApp",pubkey);
+                    if (id != -1)
+                        UpdateKey(function(result){
+                            console.log(result);
+                        },id,"ChatApp",pubkey);
                 });
             }
         }, $scope.username);
-    }
-
-    $scope.rebuildPrivateKey = function() {
-        var priv = JSON.parse($scope.privateKey);
-        var rsaKey = new RSAKey();
-        console.log($scope.privateKey);
-        rsaKey.setPrivate(priv.n,priv.e,priv.d);
-        return rsaKey;
     }
 
     // register onclose so that it will constantly retry
@@ -85,7 +77,7 @@ app.controller("Main", function ($scope, $http) {
         var data = JSON.parse(e.data);
         switch (data.type) {
             case 'msg':
-                var result = cryptico.decrypt(data.message, $scope.rebuildPrivateKey());
+                var result = cryptico.decrypt(data.message, $scope.realPrivateKey);
                 console.log("decrypt!");
                 console.log(result);
                 data.message = result.plaintext;
@@ -117,7 +109,7 @@ app.controller("Main", function ($scope, $http) {
                 if (res.length == 0) {
                     console.log("UNABLE TO LOOK UP PUBKEY FOR: ChatApp:"+buddy);
                 } else {
-                    var encrypted = cryptico.encrypt(data.message, res, $scope.rebuildPrivateKey());
+                    var encrypted = cryptico.encrypt(data.message, res, $scope.realPrivateKey);
                     var tosend = {
                         type: "msg",
                         author: data.author,
@@ -152,6 +144,30 @@ app.controller("Main", function ($scope, $http) {
                             $scope.publicKey = key;
                         });
                     }
+                    GetPrivateKey(function(r) {
+                        console.log("GetPrivateKey");
+                        console.log(r);
+                        if (r && !r["error"]) {
+                            var priv = r.key;
+                            $scope.realPrivateKey = new RSAKey();
+                            $scope.realPrivateKey.setPrivate(priv.n.toString(16),priv.e.toString(16),priv.d.toString(16));
+                            $scope.$apply(function() {
+                                $scope.privateKey = priv.text;
+                            });
+                        }
+                        GetPublicKey(function(s) {
+                            console.log("GetPublicKey");
+                            console.log(s);
+                            if (s && !s["error"]) {
+                                if (s.key !== $scope.public_key) {
+                                    $scope.addOrUpdateKey(s.key);
+                                }
+                                $scope.$apply(function() {
+                                    $scope.publicKey = s.key;
+                                });
+                            }
+                        });
+                    });
                 }, username);
             } else {
                 console.log("Failed to log in!\n" + result);
@@ -161,18 +177,45 @@ app.controller("Main", function ($scope, $http) {
 
     // send encryption keys (pub, private) to eies
     $scope.submitKeys = function () {
-        $scope.addOrUpdateKey($scope.publicKey);
+        InterpretAndWritePublic(function(result) {
+            console.log("Submit:InterpretAndWritePublic");
+            console.log(result);
+            if (result && !result["error"]) {
+                $scope.addOrUpdateKey($scope.publicKey);
+                $scope.$apply(function() {
+                    $scope.publicKey = result.key;
+                });
+            }
+        }, $scope.publicKey);
+        InterpretAndWritePrivate(function(result) {
+            console.log("Submit:InterpretAndWritePrivate");
+            console.log(result);
+            if (result && !result["error"]) {
+                $scope.$apply(function() {
+                    var priv = result.key;
+                    $scope.realPrivateKey = new RSAKey();
+                    $scope.realPrivateKey.setPrivate(priv.n.toString(16),priv.e.toString(16),priv.d.toString(16));
+                    $scope.$apply(function() {
+                        $scope.privateKey = priv.text;
+                    });
+                });
+            }
+        }, $scope.publicKey);
     };
     $scope.generateKey = function() {
-        $scope.publicKey = "";
-        $scope.privateKey = "";
-        var priv = cryptico.generateRSAKey("", 512);
-        var pkguts = {};
-        pkguts["n"] = priv.n.toString(16)
-        pkguts["e"] = priv.e.toString(16);
-        pkguts["d"] = priv.d.toString(16);
-        $scope.privateKey = JSON.stringify(pkguts);
-        $scope.publicKey = cryptico.publicKeyString(priv);
-        $scope.addOrUpdateKey($scope.publicKey);
+        RegenerateKeyPair(function(result) {
+            console.log("generateKey");
+            console.log(result);
+            if (result && !result["error"]) {
+                priv = result.private;
+                $scope.realPrivateKey = new RSAKey();
+                $scope.realPrivateKey.setPrivate(priv.n.toString(16),priv.e.toString(16),priv.d.toString(16));
+                $scope.$apply(function() {
+                    $scope.privateKey = priv.text;
+                    $scope.publicKey = result.public;
+                });
+                $scope.addOrUpdateKey($scope.publicKey);
+            }
+        });
     }
 });

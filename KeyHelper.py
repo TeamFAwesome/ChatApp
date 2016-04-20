@@ -10,6 +10,8 @@ from Crypto.PublicKey import RSA
 from Common import *
 printerer.Instance().setPrefixer() #singleton for prefixing prints with file and number
 
+import json
+
 class KeyHelperRuntimeHandler:
     def __init__(self):
         self.identity_file = os.path.expanduser("~/.chatapp_key")
@@ -18,6 +20,7 @@ class KeyHelperRuntimeHandler:
         self.private_file = self.private_key_filename_format % self.identity_file
         self.public_file = self.public_key_filename_format % self.identity_file
         self.private_key = None
+        self.private_key_text = None
         self.public_key = None
         self.verbose = False
 
@@ -69,7 +72,7 @@ class KeyHelperRuntimeHandler:
         if self.verbose:
             print("Reading%s: %s" % (file_info_to_print,filename))
         try:
-            with open(filename, 'rb') as f:
+            with open(filename, 'r') as f:
                 content = f.read()
                 f.close()
             if self.verbose:
@@ -92,7 +95,7 @@ class KeyHelperRuntimeHandler:
         if self.verbose:
             print("Writing%s: %s" % (file_info_to_print,filename))
         try:
-            with open(filename, 'wb') as content_file:
+            with open(filename, 'w') as content_file:
                 content_file.write(contents)
                 content_file.flush()
                 content_file.close()
@@ -115,9 +118,9 @@ class KeyHelperRuntimeHandler:
             return False
 
         # read private key
-        priv = self.Read(self.private_file, "private key")
-        if priv != None:
-            self.private_key = RSA.importKey(priv)
+        self.private_key_text = self.Read(self.private_file, "private key")
+        if self.private_key_text != None:
+            self.private_key = RSA.importKey(bytes(self.private_key_text,'utf8'))
 
         # read public key
         self.public_key = self.Read(self.public_file, "public key")
@@ -130,17 +133,49 @@ class KeyHelperRuntimeHandler:
         #http://stackoverflow.com/a/22449476
         key = RSA.generate(1024, os.urandom)
         self.private_key = key
-        self.Write(self.private_file, key.exportKey('PEM'), "private key")
-        os.chmod(self.private_file, 0o755)
+        self.private_key_text = key.exportKey('PEM').decode('utf-8')
+        self.Write(self.private_file, self.private_key_text, "private key")
+        os.chmod(self.private_file, 0o600)
         pubkey = key.publickey()
-        self.public_key = pubkey.exportKey()
+        self.public_key = pubkey.exportKey('PEM').decode('utf-8')
         self.Write(self.public_file, self.public_key, "public key")
+        return True
+
+    def _getPrivateKey(self):
+        return {"n": self.private_key.n, "e": self.private_key.e, "d": self.private_key.d, "text": self.private_key_text}
 
     def GetPrivateKey(self):
-        return self.private_key.n, self.private_key.e, self.private_key.d
+        return {"key": self._getPrivateKey()}
+
+    def _getPublicKey(self):
+        return self.public_key
 
     def GetPublicKey(self):
-        return self.public_key
+        return {"key": self._getPublicKey()}
+
+    def InterpretAndWritePrivate(self, textboxgarbage):
+        try:
+            priv = RSA.importKey(bytes(textboxgarbage,'utf8'))
+            text = key.exportKey('PEM').decode('utf-8')
+            if self.Write(self.private_file, text, "private key"):
+                self.private_key_text = text
+                self.private_key = priv
+                os.chmod(self.private_file, 0o600)
+                return {"key": self._getPrivateKey()}
+        except:
+            noop=1
+        return {"error": "Failed to interpret private key text!", "key": self._getPrivateKey()}
+
+    def InterpretAndWritePublic(self, textboxgarbage):
+        if self.Write(self.public_file, textboxgarbage, "public key"):
+            self.public_key = textboxgarbage
+            return {"key": self._getPublicKey()}
+        return {"error": "Failed to interpret public key text!", "key": self._getPublicKey()}
+
+    def RegenerateKeyPair(self):
+        if self.Create():
+            return {"public": self._getPublicKey(), "private": self._getPrivateKey()}
+        return {"error": "Failed to create? somehow?", "public": self._getPublicKey(), "private": self._getPrivateKey()}
 
 if __name__ == "__main__":
     import code

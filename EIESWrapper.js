@@ -146,3 +146,26 @@ function DestroyEntityToken(callback, token_id, session_id) {
     invoke(callback, "DestroyEntityToken", {token_id: token_id, session_id: session_id});
 }
 //// END ENTITY TOKEN STUFF
+
+
+//// BEGIN KeyHelper.py wrapper functions
+function GetPrivateKey(callback) {
+    invoke(callback, "GetPrivateKey", {});
+}
+
+function GetPublicKey(callback) {
+    invoke(callback, "GetPublicKey", {});
+}
+
+function InterpretAndWritePrivate(callback, textboxgarbage) {
+    invoke(callback, "InterpretAndWritePrivate", {textboxgarbage: textboxgarbage});
+}
+
+function InterpretAndWritePublic(callback, textboxgarbage) {
+    invoke(callback, "InterpretAndWritePublic", {textboxgarbage: textboxgarbage});
+}
+
+function RegenerateKeyPair(callback) {
+   invoke(callback, "RegenerateKeyPair", {});
+}
+//// END KeyHelper.py wrapper functions

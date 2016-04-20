@@ -5,7 +5,7 @@ if ! which python | grep -q "`pwd`"; then
 fi
 . venv/bin/activate
 pip install -r requirements.txt --upgrade
-python app.py &
+python app.py $@ &
 pid=$!
 trap "if ps aux | grep $pid | grep -qv grep; then echo 'Killing $pid'; kill -9 $pid && wait $pid || true; fi" EXIT TERM INT
 python -m http.server 9999 || true
