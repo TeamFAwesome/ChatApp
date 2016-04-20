@@ -107,7 +107,7 @@ class EIESWrapper:
         return self.__exec(self.session.get, 'keys/%d' % key_id, {'session_id': self.session_id}).json()
     
     def UpdateKey(self, name, body):
-        return self.__exec(self.session.put, 'keys', {'session_id': self.session_id, 'name': name, 'body': body}).json()
+        return self.__exec(self.session.put, 'keys', {'session_id': self.session_id, 'name': name, 'body': body})
         
     def DestroyKey(self, key_id):
         return self.__exec(self.session.delete, 'keys/%d' % key_id, {'session_id': self.session_id}).json()
