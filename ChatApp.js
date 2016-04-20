@@ -114,7 +114,7 @@ app.controller("Main", function ($scope, $http) {
             console.log("... to " + $scope.buddies[buddy]);
             $scope.getPubKey(function(res){
                 if (res.length == 0) {
-                    console.log("UNABLE TO LOOK UP PUBKEY FOR: ChatApp:"+message.destination);
+                    console.log("UNABLE TO LOOK UP PUBKEY FOR: ChatApp:"+$scope.buddies[buddy]);
                 } else {
                     var encrypted = cryptico.encrypt(data.message, res, $scope.rebuildPrivateKey());
                     var tosend = {
