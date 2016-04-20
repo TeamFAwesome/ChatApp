@@ -110,22 +110,23 @@ app.controller("Main", function ($scope, $http) {
             message: $scope.text
         };
         console.log("sending message: " + JSON.stringify(data) + "...");
-        for (var buddy in $scope.buddies) {
-            console.log("... to " + $scope.buddies[buddy]);
+        for (var b in $scope.buddies) {
+            var buddy = $scope.buddies[b];
+            console.log("... to " + buddy);
             $scope.getPubKey(function(res){
                 if (res.length == 0) {
-                    console.log("UNABLE TO LOOK UP PUBKEY FOR: ChatApp:"+$scope.buddies[buddy]);
+                    console.log("UNABLE TO LOOK UP PUBKEY FOR: ChatApp:"+buddy);
                 } else {
                     var encrypted = cryptico.encrypt(data.message, res, $scope.rebuildPrivateKey());
                     var tosend = {
                         type: "msg",
                         author: data.author,
                         message: encrypted.cipher,
-                        destination: $scope.buddies[buddy]
+                        destination: buddy
                     };
                     ws.send(JSON.stringify(tosend));
                 }
-            }, $scope.buddies[buddy]);
+            }, buddy);
         }
 
         // reset scope
