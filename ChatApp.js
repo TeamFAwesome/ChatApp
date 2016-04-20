@@ -146,11 +146,11 @@ app.controller("Main", function ($scope, $http) {
                 ws.send(JSON.stringify({type: "hello", name: $scope.username}));
                 $scope.getPubKey(function(key) {
                     console.log("Looking up current public key in login");
-                    /*if (key.length != 0) {
+                    if (key.length != 0) {
                         $scope.$apply(function () {
                             $scope.publicKey = key;
                         });
-                    }*/
+                    }
                 }, username);
             } else {
                 console.log("Failed to log in!\n" + result);
@@ -172,5 +172,6 @@ app.controller("Main", function ($scope, $http) {
         pkguts["d"] = priv.d.toString(16);
         $scope.privateKey = JSON.stringify(pkguts);
         $scope.publicKey = cryptico.publicKeyString(priv);
+        $scope.addOrUpdateKey($scope.publicKey);
     }
 });
