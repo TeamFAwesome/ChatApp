@@ -85,8 +85,6 @@ app.controller("Main", function ($scope, $http) {
         var data = JSON.parse(e.data);
         switch (data.type) {
             case 'msg':
-                console.log("read message:")
-                console.log(e.data)
                 var result = cryptico.decrypt(data.message, $scope.rebuildPrivateKey());
                 console.log("decrypt!");
                 console.log(result);
