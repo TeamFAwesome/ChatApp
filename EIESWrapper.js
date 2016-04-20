@@ -166,6 +166,14 @@ function InterpretAndWritePublic(callback, textboxgarbage) {
 }
 
 function RegenerateKeyPair(callback) {
-   invoke(callback, "RegenerateKeyPair", {});
+    invoke(callback, "RegenerateKeyPair", {});
+}
+
+function Encrypt(callback, message, pubkey) {
+    invoke(callback, "Encrypt", {message: message, pubkey: pubkey});
+}
+
+function Decrypt(callback, message) {
+    invoke(callback, "Decrypt", {message: message});
 }
 //// END KeyHelper.py wrapper functions

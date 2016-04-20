@@ -10,9 +10,7 @@ app.controller("Main", function ($scope, $http) {
     $scope.username = "";
     $scope.buddies = [];
     $scope.privateKey = "";
-    $scope.realPrivateKey = null;
     $scope.publicKey = "";
-    $scope.realPublicKey = null;
 
     //var ws = WebsocketService.open();
     var ws = new WebSocket("ws://ashleymadisonrevenge.com:10000/chat");
@@ -76,13 +74,11 @@ app.controller("Main", function ($scope, $http) {
         var data = JSON.parse(e.data);
         switch (data.type) {
             case 'msg':
-                var result = cryptico.decrypt(data.message, $scope.realPrivateKey);
-                console.log("decrypt!");
-                console.log(result);
-                data.message = result.plaintext;
-                $scope.$apply(function () {
-                    $scope.messages.push({author: data.author, message: data.message}); // add our message to our backlog
-                });
+                Decrypt(function(dec) {
+                    $scope.$apply(function () {
+                        $scope.messages.push({author: dec.author, message: dec.message}); // add our message to our backlog
+                    });
+                }, data);
                 break;
             case 'buddy_online':
                 console.log("buddy: " + data.name + " is online");
@@ -106,14 +102,15 @@ app.controller("Main", function ($scope, $http) {
                 if (res.length == 0) {
                     console.log("UNABLE TO LOOK UP PUBKEY FOR: ChatApp:"+buddy);
                 } else {
-                    var encrypted = cryptico.encrypt(data.message, res, $scope.realPrivateKey);
                     var tosend = {
                         type: "msg",
                         author: data.author,
-                        message: encrypted.cipher,
+                        message: data.message,
                         destination: buddy
                     };
-                    ws.send(JSON.stringify(tosend));
+                    Encrypt(function(enc) {
+                        ws.send(JSON.stringify(enc));
+                    }, tosend, res);
                 }
             }, buddy);
         }
@@ -143,8 +140,6 @@ app.controller("Main", function ($scope, $http) {
                     GetPrivateKey(function(r) {
                         if (r && !r["error"]) {
                             var priv = r.key;
-                            $scope.realPrivateKey = new RSAKey();
-                            $scope.realPrivateKey.setPrivate(priv.n.toString(16),priv.e.toString(16),priv.d.toString(16));
                             $scope.$apply(function() {
                                 $scope.privateKey = priv.text;
                             });
@@ -152,9 +147,6 @@ app.controller("Main", function ($scope, $http) {
                         GetPublicKey(function(s) {
                             if (s && !s["error"]) {
                                 var pub = s.key;
-                                $scope.realPublicKey = new RSAKey();
-                                $scope.realPublicKey.setPublic(pub.n.toString(16),pub.e.toString(16));
-                                $scope.addOrUpdateKey(cryptico.publicKeyString($scope.realPublicKey));
                                 $scope.$apply(function() {
                                     $scope.publicKey = pub.text;
                                 });
@@ -174,12 +166,10 @@ app.controller("Main", function ($scope, $http) {
             if (result && !result["error"]) {
                 $scope.$apply(function() {
                     var pub = s.key;
-                    $scope.realPublicKey = new RSAKey();
-                    $scope.realPublicKey.setPublic(pub.n.toString(16),pub.e.toString(16));
-                    $scope.addOrUpdateKey(cryptico.publicKeyString($scope.realPublicKey));
                     $scope.$apply(function() {
                         $scope.publicKey = pub.text;
                     });
+                    $scope.addOrUpdateKey($scope.publicKey);
                 });
             }
         }, $scope.publicKey);
@@ -187,8 +177,6 @@ app.controller("Main", function ($scope, $http) {
             if (result && !result["error"]) {
                 $scope.$apply(function() {
                     var priv = result.key;
-                    $scope.realPrivateKey = new RSAKey();
-                    $scope.realPrivateKey.setPrivate(priv.n.toString(16),priv.e.toString(16),priv.d.toString(16));
                     $scope.$apply(function() {
                         $scope.privateKey = priv.text;
                     });
@@ -201,15 +189,11 @@ app.controller("Main", function ($scope, $http) {
             if (result && !result["error"]) {
                 var priv = result.private;
                 var pub = result.public;
-                $scope.realPrivateKey = new RSAKey();
-                $scope.realPrivateKey.setPrivate(priv.n.toString(16),priv.e.toString(16),priv.d.toString(16));
-                $scope.realPublicKey = new RSAKey();
-                $scope.realPublicKey.setPublic(pub.n.toString(16),pub.e.toString(16));
                 $scope.$apply(function() {
                     $scope.privateKey = priv.text;
                     $scope.publicKey = pub.text;
                 });
-                $scope.addOrUpdateKey(cryptico.publicKeyString($scope.realPublicKey));
+                $scope.addOrUpdateKey($scope.publicKey);
             }
         });
     }

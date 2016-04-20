@@ -6,6 +6,7 @@
 
 import os,sys,getopt,traceback,subprocess,re
 from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
 
 from Common import *
 printerer.Instance().setPrefixer() #singleton for prefixing prints with file and number
@@ -178,6 +179,14 @@ class KeyHelperRuntimeHandler:
         if self.Create():
             return {"public": self._getPublicKey(), "private": self._getPrivateKey()}
         return {"error": "Failed to create? somehow?", "public": self._getPublicKey(), "private": self._getPrivateKey()}
+
+    def Encrypt(self, message, pubkey):
+        message["message"] = PKCS1_OAEP.new(RSA.importKey(bytes(pubkey,'utf8'))).encrypt(bytes(message["message"],'utf-8')).decode('utf-8')
+        return message
+
+    def Decrypt(self, message):
+        message["message"] = PKCS1_OAEP.new(self.private_key).decrypt(bytes(message["message"], 'utf-8')).decode('utf-8')
+        return message
 
 if __name__ == "__main__":
     import code
