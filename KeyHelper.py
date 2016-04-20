@@ -136,11 +136,11 @@ class KeyHelperRuntimeHandler:
         #http://stackoverflow.com/a/22449476
         key = RSA.generate(1024, os.urandom)
         self.private_key = key
-        self.private_key_text = key.exportKey().decode('utf-8')
+        self.private_key_text = key.exportKey().decode('utf8')
         self.Write(self.private_file, self.private_key_text, "private key")
         os.chmod(self.private_file, 0o600)
         self.public_key = key.publickey()
-        self.public_key_text = self.public_key.exportKey().decode('utf-8')
+        self.public_key_text = self.public_key.exportKey().decode('utf8')
         self.Write(self.public_file, self.public_key_text, "public key")
         return True
 
@@ -159,7 +159,7 @@ class KeyHelperRuntimeHandler:
     def InterpretAndWritePrivate(self, textboxgarbage):
         try:
             priv = RSA.importKey(bytes(textboxgarbage,'utf8'))
-            text = key.exportKey('PEM').decode('utf-8')
+            text = key.exportKey('PEM').decode('utf8')
             if self.Write(self.private_file, text, "private key"):
                 self.private_key_text = text
                 self.private_key = priv
@@ -181,12 +181,13 @@ class KeyHelperRuntimeHandler:
         return {"error": "Failed to create? somehow?", "public": self._getPublicKey(), "private": self._getPrivateKey()}
 
     def Encrypt(self, message, pubkey):
-        message["message"] = PKCS1_OAEP.new(RSA.importKey(bytes(pubkey,'utf8'))).encrypt(bytes(message["message"],'utf-8')).decode('utf-8')
-        return message
+        keydata = bytes(pubkey, 'utf-8')
+        key = RSA.importKey(keydata)
+        import codecs
+        return {"encrypted": codecs.encode(PKCS1_OAEP.new(key).encrypt(bytes(message,'utf-8')),'hex').decode('utf-8')}
 
     def Decrypt(self, message):
-        message["message"] = PKCS1_OAEP.new(self.private_key).decrypt(bytes(message["message"], 'utf-8')).decode('utf-8')
-        return message
+        return {"decrypted": PKCS1_OAEP.new(self.private_key).decrypt(bytes.fromhex(message)).decode('utf-8')}
 
 if __name__ == "__main__":
     import code

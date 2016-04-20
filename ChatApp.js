@@ -75,10 +75,11 @@ app.controller("Main", function ($scope, $http) {
         switch (data.type) {
             case 'msg':
                 Decrypt(function(dec) {
+                    console.log(dec)
                     $scope.$apply(function () {
-                        $scope.messages.push({author: dec.author, message: dec.message}); // add our message to our backlog
+                        $scope.messages.push({author: data.author, message: dec.decrypted}); // add our message to our backlog
                     });
-                }, data);
+                }, data.message);
                 break;
             case 'buddy_online':
                 console.log("buddy: " + data.name + " is online");
@@ -102,15 +103,16 @@ app.controller("Main", function ($scope, $http) {
                 if (res.length == 0) {
                     console.log("UNABLE TO LOOK UP PUBKEY FOR: ChatApp:"+buddy);
                 } else {
-                    var tosend = {
-                        type: "msg",
-                        author: data.author,
-                        message: data.message,
-                        destination: buddy
-                    };
                     Encrypt(function(enc) {
-                        ws.send(JSON.stringify(enc));
-                    }, tosend, res);
+                        console.log(enc)
+                        var tosend = {
+                            type: "msg",
+                            author: data.author,
+                            message: enc.encrypted,
+                            destination: buddy
+                        };
+                        ws.send(JSON.stringify(tosend));
+                    }, data.message, res);
                 }
             }, buddy);
         }
@@ -150,6 +152,7 @@ app.controller("Main", function ($scope, $http) {
                                 $scope.$apply(function() {
                                     $scope.publicKey = pub.text;
                                 });
+                                $scope.addOrUpdateKey($scope.publicKey);
                             }
                         });
                     });
