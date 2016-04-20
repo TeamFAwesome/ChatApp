@@ -116,7 +116,6 @@ class KeyHelperRuntimeHandler:
 
         # read private key
         priv = self.Read(self.private_file, "private key")
-        print(priv)
         if priv != None:
             self.private_key = RSA.importKey(priv)
 

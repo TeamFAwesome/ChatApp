@@ -1,14 +1,24 @@
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-from EIESWrapper import *
 import inspect
+import sys
+from EIESWrapper import *
+from Common import *
+printerer.Instance().setPrefixer() #singleton for prefixing prints with file and number
+
+from KeyHelper import *
 
 clients = []
 
 class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
     def callFunctionWithJsonArguments(self, funcname, arguments):
         try:
+            # check for named function on keyhelper
+            if (hasattr(self.keyhelper, funcname)):
+                f = getattr(self.keyhelper, funcname)
+                return f(**{key:value for key,value in arguments.items() if key in inspect.getargspec(f)[0] and not key == "func"})
+            # if function wasn't on keyhelper, call it on eies OR DIE TRYING
             f = getattr(self.eies, funcname)
             return f(**{key:value for key,value in arguments.items() if key in inspect.getargspec(f)[0] and not key == "func"})
         except TypeError as e:
@@ -22,6 +32,13 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
     def open(self, *args):
         print("open", "EIESWrapperHelper")
         self.eies = EIESWrapper()
+        self.keyhelper = KeyHelperRuntimeHandler()
+        errorcode = self.keyhelper.Init()
+        if errorcode:
+            sys.exit(errorcode)
+        if not self.keyhelper.Load() and not self.keyhelper.Create():
+            print("Failed to load or create keys", file=sys.stderr)
+            sys.exit(4)
         clients.append(self)
 
     def on_message(self, msg):
