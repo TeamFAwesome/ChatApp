@@ -67,7 +67,8 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
             raise
 
     def on_close(self):
-        clients.remove(self)
+        if self in clients:
+            clients.remove(self)
 
 api = tornado.web.Application([(r'/api', EIESWrapperHandler)])
 api.listen(11000)
