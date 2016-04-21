@@ -38,6 +38,7 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
     def open(self, *args):
         if self.keyhelper.verbose:
             print("open", "EIESWrapperHelper")
+        self.set_nodelay(True)
         self.eies = EIESWrapper()
         errorcode = self.keyhelper.Init()
         if errorcode:

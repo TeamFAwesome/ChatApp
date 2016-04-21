@@ -12,6 +12,7 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
         return True
 
     def open(self, *args):
+        self.set_nodelay(True)
         print("open", "WebSocketChatHandler")
         namelessclients.append(self)
         print("#nameless = %d" % len(namelessclients))
