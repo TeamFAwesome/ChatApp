@@ -7,7 +7,7 @@
 import os,sys,getopt,traceback,subprocess,re
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
-
+import codecs
 from Common import *
 printerer.Instance().setPrefixer() #singleton for prefixing prints with file and number
 
@@ -183,11 +183,17 @@ class KeyHelperRuntimeHandler:
     def Encrypt(self, message, pubkey):
         keydata = bytes(pubkey, 'utf-8')
         key = RSA.importKey(keydata)
-        import codecs
         return {"encrypted": codecs.encode(PKCS1_OAEP.new(key).encrypt(bytes(message,'utf-8')),'hex').decode('utf-8')}
 
     def Decrypt(self, message):
-        return {"decrypted": PKCS1_OAEP.new(self.private_key).decrypt(bytes.fromhex(message)).decode('utf-8')}
+        decrypted = None
+        try:
+            decrypted = PKCS1_OAEP.new(self.private_key).decrypt(codecs.decode(bytes(message, 'utf-8'), 'hex')).decode('utf-8')
+        except ValueError as err:
+            print("Failed to decrypt message: %s" % str(err), file=sys.stderr)
+            realprint(traceback.format_exc(), file=sys.stderr)
+            return {"error": "Failed to decrypt message"}
+        return {"decrypted": decrypted}
 
 if __name__ == "__main__":
     import code
