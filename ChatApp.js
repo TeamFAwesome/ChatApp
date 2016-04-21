@@ -84,12 +84,16 @@ app.controller("Main", function ($scope, $http) {
                 }, data.message);
                 break;
             case 'buddy_online':
-                console.log("buddy: " + data.name + " is online");
-                $scope.buddies.push(data.name);
+                if (data.name != $scope.username) {
+                    console.log("buddy: " + data.name + " is online");
+                    $scope.buddies.push(data.name);
+                }
                 break;
             case 'buddy_offline':
-                console.log("buddy: " + data.name + " is offline");
-                $scope.buddies.splice($scope.buddies.indexOf(data.name), 1);
+                if (data.name != $scope.username) {
+                    console.log("buddy: " + data.name + " is offline");
+                    $scope.buddies.splice($scope.buddies.indexOf(data.name), 1);
+                }
                 break;
         }
     };
@@ -99,6 +103,7 @@ app.controller("Main", function ($scope, $http) {
             author: $scope.username,
             message: $scope.text
         };
+        $scope.messages.push(data);
         for (var b in $scope.buddies) {
             var buddy = $scope.buddies[b];
             $scope.getPubKey(function(res){
