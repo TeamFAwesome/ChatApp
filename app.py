@@ -32,7 +32,8 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
         return True
 
     def open(self, *args):
-        print("open", "EIESWrapperHelper")
+        if self.keyhelper.verbose:
+            print("open", "EIESWrapperHelper")
         self.eies = EIESWrapper()
         self.keyhelper = KeyHelperRuntimeHandler()
         errorcode = self.keyhelper.Init()
@@ -44,7 +45,8 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
         clients.append(self)
 
     def on_message(self, msg):
-        print("Received api call to websocket wrapper: %s" % msg)
+        if self.keyhelper.verbose:
+            print("Received api call to websocket wrapper: %s" % msg)
         message = json.loads(msg)
         try:
             if not "func" in message.keys():
