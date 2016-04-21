@@ -39,8 +39,7 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
         print("Sending online status of %s" % self.name)
         for c in clients:
             clients[c].write_message(json.dumps({"type": "buddy_online", "name": self.name}))
-            if c != self.name:
-                self.write_message(json.dumps({"type": "buddy_online", "name": c}))
+            self.write_message(json.dumps({"type": "buddy_online", "name": c}))
 
     def send_buddy_offline(self):
         print("Sending offline status of %s" % self.name)
@@ -51,7 +50,8 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
         if self in namelessclients:
             namelessclients.remove(self)
         else:
-            del clients[self.name]
+            if self in clients:
+                del clients[self.name]
             self.send_buddy_offline()
 
     def __str__(self):
