@@ -75,10 +75,12 @@ app.controller("Main", function ($scope, $http) {
         switch (data.type) {
             case 'msg':
                 Decrypt(function(dec) {
-                    console.log(dec)
-                    $scope.$apply(function () {
-                        $scope.messages.push({author: data.author, message: dec.decrypted}); // add our message to our backlog
-                    });
+                    if (!dec || dec["error"])
+                        console.error("Failed to decrypt message from "+data.author+" (to: "+data.destination+")");
+                    else
+                        $scope.$apply(function () {
+                            $scope.messages.push({author: data.author, message: dec.decrypted}); // add our message to our backlog
+                        });
                 }, data.message);
                 break;
             case 'buddy_online':
