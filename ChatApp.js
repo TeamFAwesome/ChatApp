@@ -111,7 +111,6 @@ app.controller("Main", function ($scope, $http) {
                     console.log("UNABLE TO LOOK UP PUBKEY FOR: ChatApp:"+buddy);
                 } else {
                     Encrypt(function(enc) {
-                        console.log(enc)
                         var tosend = {
                             type: "msg",
                             author: data.author,
