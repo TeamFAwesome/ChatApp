@@ -34,8 +34,7 @@ app.controller("Main", function ($scope, $http) {
                     NewEntity(function(entres){
                         var entity_id = entres.id;
                         CreateEntityToken(function(tokres){
-                            console.log("If the following json means good things, then you deserve a high five.");
-                            console.log(tokres);
+                            console.log("EIES has been initialized to allow you to decrypt messages sent by other ChatApp users");
                         }, entity_id, key_id);
                     }, "ChatApp", "ChatApp:"+$scope.username, null);
                 },"ChatApp",pubkey);
@@ -53,7 +52,7 @@ app.controller("Main", function ($scope, $http) {
                             if (!result["id"])
                                 console.error(result);
                             else
-                                console.log(result);
+                                console.log("Updating your public key stored in EIES");
                         },id,"ChatApp",pubkey);
                 });
             }
@@ -131,7 +130,6 @@ app.controller("Main", function ($scope, $http) {
     $scope.login = function (username, password) {
         console.log("Logging in as " + username);
         Login(function (result) {
-            console.log(result);
             if (result) {
                 $scope.$apply(function () {
                     $scope.loggedIn = true;
