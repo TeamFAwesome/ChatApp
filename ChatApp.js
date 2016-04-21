@@ -86,7 +86,7 @@ app.controller("Main", function ($scope, $http) {
                 if (data.name != $scope.username) {
                     $scope.$apply(function () {
                         //show buddy statusd notification
-                        $scope.messages.push({author: data.name, message: "has come online!", buddystate: true});
+                        $scope.messages.push({author: data.name, message: "has come online!", buddystate: 'online'});
                     });
                     console.log("buddy: " + data.name + " is online");
                     $scope.buddies.push(data.name);
@@ -96,7 +96,7 @@ app.controller("Main", function ($scope, $http) {
                 if (data.name != $scope.username) {
                     $scope.$apply(function () {
                         //show buddy statusd notification
-                        $scope.messages.push({author: data.name, message: "has gone offline!", buddystate: false});
+                        $scope.messages.push({author: data.name, message: "has gone offline!", buddystate: 'offline'});
                     });
                     console.log("buddy: " + data.name + " is offline");
                     $scope.buddies.splice($scope.buddies.indexOf(data.name), 1);
