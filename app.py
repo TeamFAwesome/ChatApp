@@ -12,6 +12,10 @@ from KeyHelper import *
 clients = []
 
 class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
+    def __init__(self, something, somethingelse):
+        tornado.websocket.WebSocketHandler.__init__(self, something, somethingelse)
+        self.keyhelper = KeyHelperRuntimeHandler()
+
     def callFunctionWithJsonArguments(self, funcname, arguments):
         try:
             # check for named function on keyhelper
@@ -35,7 +39,6 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
         if self.keyhelper.verbose:
             print("open", "EIESWrapperHelper")
         self.eies = EIESWrapper()
-        self.keyhelper = KeyHelperRuntimeHandler()
         errorcode = self.keyhelper.Init()
         if errorcode:
             sys.exit(errorcode)
