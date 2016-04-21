@@ -72,33 +72,38 @@
 
 <!--KEYS ENTRY-->
 <div class="panel panel-default" ng-show="loggedIn">
+    <!-- collapsability based on http://www.w3schools.com/bootstrap/bootstrap_collapse.asp -->
     <div class="panel-heading">
-        <h4>Encryption Keys</h4>
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#collapse1">
+                Encryption Keys
+            </a>
+        </h4>
     </div>
-    <div class="panel-body">
 
-        <form ng-submit="submitKeys()">
+    <div id="collapse1" class="panel-collapse collapse">
+        <div class="panel-body">
+            <form ng-submit="submitKeys()">
 
-            <div class="form-group">
-                <label for="public">Public Key</label>
-                <input type="text" class="form-control" id="public" placeholder="Enter Public Key Here"
-                       ng-model="publicKey">
-            </div>
+                <div class="form-group">
+                    <label for="public">Public Key</label>
+                    <input type="text" class="form-control" id="public" placeholder="Enter Public Key Here"
+                           ng-model="publicKey">
+                </div>
 
-            <div class="form-group">
-                <label for="private">Private Key</label>
-                <input type="text" class="form-control" id="private" placeholder="Enter Private Key Here"
-                       ng-model="privateKey">
-            </div>
+                <div class="form-group">
+                    <label for="private">Private Key</label>
+                    <input type="text" class="form-control" id="private" placeholder="Enter Private Key Here"
+                           ng-model="privateKey">
+                </div>
 
 
-            <input class="btn btn-default pull-right" type="submit" value="Submit Keys"/>
-        </form>
-        <button class="btn btn-primary pull left" ng-click="generateKey()">Generate New Key</button>
-
+                <input class="btn btn-default pull-right" type="submit" value="Submit Keys"/>
+            </form>
+            <button class="btn btn-primary pull left" ng-click="generateKey()">Generate New Key</button>
+        </div>
     </div>
 </div>
-
 
 </body>
 </html>
