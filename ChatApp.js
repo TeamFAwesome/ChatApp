@@ -84,12 +84,20 @@ app.controller("Main", function ($scope, $http) {
                 break;
             case 'buddy_online':
                 if (data.name != $scope.username) {
+                    $scope.$apply(function () {
+                        //show buddy statusd notification
+                        $scope.messages.push({author: data.name, message: "has come online!", buddystate: true});
+                    });
                     console.log("buddy: " + data.name + " is online");
                     $scope.buddies.push(data.name);
                 }
                 break;
             case 'buddy_offline':
                 if (data.name != $scope.username) {
+                    $scope.$apply(function () {
+                        //show buddy statusd notification
+                        $scope.messages.push({author: data.name, message: "has gone offline!", buddystate: false});
+                    });
                     console.log("buddy: " + data.name + " is offline");
                     $scope.buddies.splice($scope.buddies.indexOf(data.name), 1);
                 }

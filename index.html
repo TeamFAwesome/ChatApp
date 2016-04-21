@@ -46,8 +46,14 @@
     <div class="panel-body">
         <ul class="list-group">
             <li class="list-group-item" ng-repeat="(messageId, messageItem) in messages">
-                <span class="badge pull-left">{{messageItem.author}}</span>&nbsp;
-                {{messageItem.message}}
+                <h5>
+                    <span class="label pull-left"
+                        ng-class="{'label-default': messageItem.author !== username && !messageItem.buddystate,
+                        'label-primary': messageItem.author === username && !messageItem.buddystate,
+                        'label-success': messageItem.buddystate!==null && messageItem.buddystate,
+                        'label-error': messageItem.buddystate!==null && !messageItem.buddystate}">{{messageItem.author}}</span>&nbsp;
+                    {{messageItem.message}}
+                </h5>
             </li>
         </ul>
     </div>
