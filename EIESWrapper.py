@@ -43,6 +43,7 @@ class EIESWrapper:
         self.user_id = None
         self.session_id = None
         self.session = requests.Session()
+        self.logged_in_callback = None
 
     def __exec(self, operation, page, args):
         global debug
@@ -68,6 +69,9 @@ class EIESWrapper:
             print("%s\t%s" % (str(res), jsonmaybe))
         return res
 
+    def SetLoginCallback(self, func):
+        self.logged_in_callback = func
+
     ### BEGIN SESSION
     def Login(self, email, password):
         res = self.__exec(self.session.post, 'login', {'email': email, 'password': password})
@@ -76,6 +80,8 @@ class EIESWrapper:
             return False
         self.user_id = res.json()['user_id']
         self.session_id = res.json()['session_id']
+        if self.logged_in_callback != None:
+            self.logged_in_callback(self.user_id)
         return True
 
     def Logout(self):
@@ -88,20 +94,18 @@ class EIESWrapper:
         return True
         
     ### END SESSION
-        
-        
+
     ### BEGIN USER INFO STUFF
     def GetUserInfo(self, user_id=None):
         if user_id == None:
             user_id = self.user_id
         return self.__exec(self.session.get, 'users/%d.json' % user_id, {'session_id': self.session_id}).json()
     ### BEGIN USER INFO STUFF
-    
-    
+
     ### BEGIN KEY STUFF
     def LookupPubKey(self, domain, port):
         return self.__exec(self.session.get, 'public_keys', {'domain': domain, 'port': port}).json()
-    
+
     def NewKey(self, name, body):
         return self.__exec(self.session.post, 'keys', {'session_id': self.session_id, 'name': name, 'body': body}).json()
         

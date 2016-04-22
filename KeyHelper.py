@@ -15,7 +15,7 @@ import json
 
 class KeyHelperRuntimeHandler:
     def __init__(self):
-        self.identity_file = os.path.expanduser("~/.chatapp_key")
+        self.identity_file = None
         self.public_key_filename_format = "%s.pub"
         self.private_key_filename_format = "%s.pem"
         self.private_file = self.private_key_filename_format % self.identity_file
@@ -35,6 +35,13 @@ class KeyHelperRuntimeHandler:
 \n\
 \t-h                        display this text" % (sys.argv[0]), file=sys.stderr);
 
+    def SetIdentityFileName(self, filename="~/.chatapp_key"):
+        self.identity_file = os.path.expanduser(filename)
+        self.private_file = self.private_key_filename_format % self.identity_file
+        self.public_file = self.public_key_filename_format % self.identity_file
+        if self.verbose:
+            print("Using identity_file: %s" % self.identity_file)
+
     def Init(self):
         # read and handle options
         try:
@@ -46,9 +53,7 @@ class KeyHelperRuntimeHandler:
             return 2
         for o,a in opts:
             if o == "-k":
-                self.identity_file = os.path.expanduser(a)
-                self.private_file = self.private_key_filename_format % a
-                self.public_file = self.public_key_filename_format % a
+                self.SetIdentityFileName(a)
             elif o == "-v":
                 self.verbose = True
             else:
@@ -56,12 +61,10 @@ class KeyHelperRuntimeHandler:
                 if o == "-h":
                     return 0
                 return 1
-        if not self.identity_file:
+        if __name__ == "__main__" and not self.identity_file:
             self.ShowUsage()
             return 1
 
-        if self.verbose:
-            print("Using identity_file: %s" % self.identity_file)
         return
 
     def Read(self, filename, file_info_to_print = None):
@@ -133,6 +136,8 @@ class KeyHelperRuntimeHandler:
         return False
 
     def Create(self):
+        if self.private_file == None or self.identity_file == None or self.public_file == None:
+            return False
         #http://stackoverflow.com/a/22449476
         key = RSA.generate(1024, os.urandom)
         self.private_key = key

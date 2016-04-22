@@ -35,6 +35,12 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
         return True
 
+    def LoginIDChanged(self, user_id):
+        self.keyhelper.SetIdentityFileName("~/.chatapp_key_%d" % user_id)
+        if not self.keyhelper.Load() and not self.keyhelper.Create():
+            print("Failed to load or create keys for user_id=%d" % user_id, file=sys.stderr)
+            sys.exit(4)
+
     def open(self, *args):
         if self.keyhelper.verbose:
             print("open", "EIESWrapperHelper")
@@ -43,9 +49,7 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
         errorcode = self.keyhelper.Init()
         if errorcode:
             sys.exit(errorcode)
-        if not self.keyhelper.Load() and not self.keyhelper.Create():
-            print("Failed to load or create keys", file=sys.stderr)
-            sys.exit(4)
+        self.eies.SetLoginCallback(self.LoginIDChanged)
         clients.append(self)
 
     def on_message(self, msg):
@@ -55,19 +59,16 @@ class EIESWrapperHandler(tornado.websocket.WebSocketHandler):
         try:
             if not "func" in message.keys():
                 message["result"] = "AMBIGUOUS FUNCTION CALLED"
-                for client in clients:
-                    client.write_message(json.dumps(message))
+                self.write_message(json.dumps(message))
                 print("UNSURE WHICH WRAPPED FUNCTION TO CALL: ",message)
             else:
-                for client in clients:
-                    message["result"] = client.callFunctionWithJsonArguments(message["func"], message)
-                    #print("RESPONDING: %s" % json.dumps(message["result"]))
-                    client.write_message(json.dumps(message))
+                message["result"] = self.callFunctionWithJsonArguments(message["func"], message)
+                #print("RESPONDING: %s" % json.dumps(message["result"]))
+                self.write_message(json.dumps(message))
         except:
             message["result"] = "general websocket explosion"
             print("Fatal exception ocurred while trying to handle arguments and invoke. ungh.")
-            for client in clients:
-                client.write_message(json.dumps(message))
+            self.write_message(json.dumps(message))
             raise
 
     def on_close(self):
