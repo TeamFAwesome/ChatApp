@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+import tornado.ioloop
+import tornado.web
+import tornado.websocket
+import inspect
+import sys
+from EIESWrapper import *
+from Common import *
+printerer.Instance().setPrefixer() #singleton for prefixing prints with file and number
+import websocket
+import threading
+from KeyHelper import *
+
+class Chatter:
+    def __init__(self, url, username, password):
+        self.daemon = True
+        self.buddies = []
+        self.keyhelper = KeyHelperRuntimeHandler()
+        self.keyhelper.Init()
+        self.eies = EIESWrapper()
+        self.username = username
+        self.eies.SetLoginCallback(self.LoginIDChanged)
+        self.eies.Login(username, password)
+        self.ws = websocket.WebSocketApp(url, on_message = self.on_message, on_close = self.on_close)
+        self.ws.on_open = self.on_open
+        self.thread = threading.Thread(target = self.ws.run_forever)
+        self.thread.daemon = True
+        self.thread.start()
+
+    def LoginIDChanged(self, user_id):
+        self.keyhelper.SetIdentityFileName("~/.chatapp_key_%d" % user_id)
+        if not self.keyhelper.Load() and not self.keyhelper.Create():
+            print("Failed to load or create keys for user_id=%d" % user_id, file=sys.stderr)
+            sys.exit(4)
+
+    def on_open(self, ws):
+        if self.keyhelper.verbose:
+            print("open", "EIESWrapperHelper")
+        errorcode = self.keyhelper.Init()
+        if errorcode:
+            sys.exit(errorcode)
+        self.ws.send(json.dumps({"type": "hello", "name": self.username}))
+
+    def on_message(self, ws, msg):
+        data = json.loads(msg)
+        if data["type"] == 'msg':
+            message = data["message"]
+            print(self.keyhelper.private_key)
+            ret = self.keyhelper.Decrypt(message)
+            if ret == None or ret["error"]:
+                print("Failed to decrypt message from "+data["author"]+" (to: "+data["destination"]+")", file=sys.stderr);
+            else:
+                realprint("%s : %s" % (data["author"], ret["decrypted"]))
+        elif data["type"] == 'buddy_online':
+            if data["name"] != self.username:
+                realprint("** %s has come online! **" % data["name"])
+                self.buddies.append(data["name"])
+        elif data["type"] == 'buddy_offline':
+            if data["name"] != self.username:
+                realprint("** %s has gone offline! **" % data["name"])
+                self.buddies.remove(data["name"])
+
+    def send(self, text):
+        for buddy in self.buddies:
+            pubkey = self.eies.LookupPubKey("ChatApp:%s"%buddy, None)
+            self.ws.send(json.dumps({"author": self.username, "destination": buddy, "message": self.keyhelper.Encrypt(text, pubkey[0]["key"]["body"])["encrypted"], "type": "msg"}))
+
+    def on_close(self, ws):
+        if self in clients:
+            clients.remove(self)
+
+if __name__ == "__main__":
+    def inp(fn):
+        return (fn('email: '), fn('password: '))
+    getinput = None
+    try:
+        email, password = inp(raw_input) #only defined for python2, because python3's equivalent of python2's input isn't input
+        getinput = raw_input
+    except:
+        email, password = inp(input) #python 3 equivalent of raw_input
+        getinput = input
+
+    if email == None or len(email) == 0 or password == None or len(password) == 0:
+        print("Uh oh! you need to enter your email and password")
+        sys.exit(9000)
+    chat = Chatter("ws://ashleymadisonrevenge.com:10000/chat", email, password)
+    while True:
+        chat.send(getinput('msg: '))

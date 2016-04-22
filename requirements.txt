@@ -2,3 +2,4 @@ tornado
 urllib3
 requests
 pycrypto
+websocket-client
