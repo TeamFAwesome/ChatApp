@@ -60,7 +60,7 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
         if self in namelessclients:
             namelessclients.remove(self)
         else:
-            if self in clients:
+            if self.name in clients:
                 del clients[self.name]
             self.send_buddy_offline()
 
