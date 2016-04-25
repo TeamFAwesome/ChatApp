@@ -124,6 +124,7 @@ app.controller("Main", function ($scope, $http) {
                             message: enc.encrypted,
                             destination: buddy
                         };
+                        console.log(tosend)
                         ws.send(JSON.stringify(tosend));
                     }, data.message, res);
                 }

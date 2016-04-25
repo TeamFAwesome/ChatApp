@@ -20,18 +20,50 @@ class Chatter:
         self.eies = EIESWrapper()
         self.username = username
         self.eies.SetLoginCallback(self.LoginIDChanged)
-        self.eies.Login(username, password)
-        self.ws = websocket.WebSocketApp(url, on_message = self.on_message, on_close = self.on_close)
-        self.ws.on_open = self.on_open
-        self.thread = threading.Thread(target = self.ws.run_forever)
-        self.thread.daemon = True
-        self.thread.start()
+        if self.eies.Login(username, password):
+            self.ws = websocket.WebSocketApp(url, on_message = self.on_message, on_close = self.on_close)
+            self.ws.on_open = self.on_open
+            self.thread = threading.Thread(target = self.ws.run_forever)
+            self.thread.daemon = True
+            self.thread.start()
+        else:
+            print("Incorrect login")
+            sys.exit(1)
+
+    def getPubKey(self, username):
+        res = self.eies.LookupPubKey("ChatApp:%s"%username, None)
+        if len(res) == 0 or not "key" in res[0] or not "body" in res[0]["key"]:
+            return ""
+        return res[0]["key"]["body"]
+
+    def addOrUpdateKey(self, pubkey):
+        res = self.getPubKey(self.username)
+        if len(res) == 0:
+            key_id = self.eies.NewKey("ChatApp",self.keyhelper.GetPublicKey()["key"]["text"])
+            entity_id = self.eies.NewEntity("ChatApp", "ChatApp:%s" % self.username, None)
+            self.eies.CreateEntityToken(entity_id, key_id)
+            print("EIES has been initialized to allow you to decrypt messages sent by other ChatApp users")
+        else:
+            kid = -1
+            infores = self.eies.GetUserInfo()
+            for i in infores["keys"]:
+                if i["name"] == "ChatApp":
+                    kid = i["id"]
+                    break
+            if kid != -1:
+                print("Updating key registered in EIES")
+                self.eies.UpdateKey(kid, "ChatApp", pubkey)
 
     def LoginIDChanged(self, user_id):
         self.keyhelper.SetIdentityFileName("~/.chatapp_key_%d" % user_id)
         if not self.keyhelper.Load() and not self.keyhelper.Create():
             print("Failed to load or create keys for user_id=%d" % user_id, file=sys.stderr)
             sys.exit(4)
+        r = self.keyhelper.GetPrivateKey()
+        if r and not "error" in r.keys():
+            s = self.keyhelper.GetPublicKey()
+            if s and not "error" in s.keys():
+                self.addOrUpdateKey(s["key"]["text"])
 
     def on_open(self, ws):
         if self.keyhelper.verbose:
@@ -45,9 +77,8 @@ class Chatter:
         data = json.loads(msg)
         if data["type"] == 'msg':
             message = data["message"]
-            print(self.keyhelper.private_key)
             ret = self.keyhelper.Decrypt(message)
-            if ret == None or ret["error"]:
+            if ret == None or "error" in ret.keys():
                 print("Failed to decrypt message from "+data["author"]+" (to: "+data["destination"]+")", file=sys.stderr);
             else:
                 realprint("%s : %s" % (data["author"], ret["decrypted"]))
@@ -62,8 +93,11 @@ class Chatter:
 
     def send(self, text):
         for buddy in self.buddies:
-            pubkey = self.eies.LookupPubKey("ChatApp:%s"%buddy, None)
-            self.ws.send(json.dumps({"author": self.username, "destination": buddy, "message": self.keyhelper.Encrypt(text, pubkey[0]["key"]["body"])["encrypted"], "type": "msg"}))
+            pubkey = self.getPubKey(buddy)
+            if len(pubkey)==0:
+                print("Failed to lookup pubkey for %s" % buddy)
+            else:
+                self.ws.send(json.dumps({"author": self.username, "destination": buddy, "message": self.keyhelper.Encrypt(text, pubkey)["encrypted"], "type": "msg"}))
 
     def on_close(self, ws):
         if self in clients:
@@ -85,4 +119,6 @@ if __name__ == "__main__":
         sys.exit(9000)
     chat = Chatter("ws://ashleymadisonrevenge.com:10000/chat", email, password)
     while True:
-        chat.send(getinput('msg: '))
+        text = getinput('msg: ')
+        if len(text) > 0:
+            chat.send(text)
