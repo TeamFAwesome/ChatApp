@@ -3,6 +3,11 @@ The chat app that integrates with EIES security as a demo.
 This app was based on some python websocket starter code found here,
 http://iot-projects.com/index.php?id=websocket-a-simple-example
 
+## Use ##
+Requires you to have registered an account on https://eies.herokuapp.com
+
+Your username and password in the chat GUI are those of your EIES account.
+
 ## Dependencies ##
 On Ubuntu:
 ```
